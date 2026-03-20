@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProductScout IA Innovasmart</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#060608;--bg2:#0d0d11;--bg3:#13131c;--bg4:#1a1a26;--accent:#00e5ff;--accent2:#00b8cc;--accent-dim:rgba(0,229,255,0.08);--gold:#f0c040;--gold-dim:rgba(240,192,64,0.1);--green:#00ff88;--green-dim:rgba(0,255,136,0.1);--red:#ff4455;--red-dim:rgba(255,68,85,0.1);--text:#dde0f0;--dim:#50506a;--dim2:#1e1e2e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,0.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+.glow{position:fixed;top:-200px;right:-100px;width:600px;height:600px;background:radial-gradient(ellipse,rgba(0,229,255,0.05) 0%,transparent 65%);pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:0 24px 100px}
+header{padding:52px 0 40px;border-bottom:1px solid var(--dim2);margin-bottom:44px;opacity:0;animation:fadeUp 0.5s ease 0.1s forwards}
+.top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.brand-tag{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;padding:5px 12px;border:1px solid rgba(0,229,255,0.3);border-radius:2px}
+.ver-tag{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:2px}
+h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(3.2rem,9vw,6rem);line-height:0.9;letter-spacing:2px;margin-bottom:16px}
+h1 .hl{color:var(--accent)}
+.subtitle{font-size:13px;color:var(--dim);max-width:520px;line-height:1.7}
+.config-panel{opacity:0;animation:fadeUp 0.5s ease 0.25s forwards}
+.sec-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--dim2)}
+.countries-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:28px}
+.cbtn{background:var(--bg3);border:1px solid var(--dim2);border-radius:4px;padding:12px 10px;cursor:pointer;text-align:center;transition:all 0.15s;color:var(--dim);font-family:'Syne',sans-serif;font-size:12px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:6px}
+.cbtn:hover{border-color:var(--accent);color:var(--text)}
+.cbtn.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+.cflag{font-size:22px;line-height:1}
+.cname{font-size:10px;letter-spacing:1px;text-transform:uppercase}
+.cnote{font-size:9px;color:var(--dim);font-family:'JetBrains Mono',monospace}
+.filters-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:28px}
+.fwrap{position:relative}
+.fwrap select{width:100%;background:var(--bg3);border:1px solid var(--dim2);border-radius:4px;color:var(--text);font-family:'Syne',sans-serif;font-size:12px;font-weight:600;padding:11px 34px 11px 14px;outline:none;appearance:none;cursor:pointer;transition:border-color 0.2s}
+.fwrap select:focus{border-color:var(--accent)}
+.fwrap select option{background:var(--bg3)}
+.fwrap::after{content:'v';position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:10px;pointer-events:none}
+.chips-section{margin-bottom:28px}
+.chips-flex{display:flex;flex-wrap:wrap;gap:7px}
+.chip{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:6px 12px;border-radius:2px;border:1px solid var(--dim2);background:transparent;color:var(--dim);cursor:pointer;transition:all 0.15s;user-select:none}
+.chip:hover{border-color:var(--accent);color:var(--text)}
+.chip.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+.chip.gold.active{background:var(--gold-dim);border-color:var(--gold);color:var(--gold)}
+.scan-wrap{margin-bottom:52px}
+.scan-btn{width:100%;padding:20px;background:var(--accent);color:var(--bg);font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:4px;border:none;border-radius:4px;cursor:pointer;transition:background 0.2s,transform 0.1s;position:relative;overflow:hidden}
+.scan-btn:not(:disabled):hover{background:var(--accent2)}
+.scan-btn:active{transform:scale(0.995)}
+.scan-btn:disabled{background:var(--dim2);color:var(--dim);cursor:not-allowed}
+.scan-btn .s-loader{display:none;width:22px;height:22px;border:2px solid var(--bg);border-top-color:transparent;border-radius:50%;animation:spin 0.65s linear infinite;margin:0 auto}
+.scan-btn.loading .s-text{display:none}
+.scan-btn.loading .s-loader{display:block}
+.scan-hint{text-align:center;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:2px;margin-top:10px}
+.err{display:none;background:var(--red-dim);border:1px solid var(--red);border-radius:4px;padding:12px 16px;font-size:12px;color:#ff8899;margin-bottom:16px;font-family:'JetBrains Mono',monospace}
+#results{display:none}
+#results.on{display:block;animation:fadeUp 0.4s ease forwards}
+.results-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid var(--dim2);flex-wrap:wrap;gap:12px}
+.results-bar h2{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:2px}
+.results-bar h2 span{color:var(--accent)}
+.meta-tags{display:flex;gap:8px;flex-wrap:wrap}
+.meta-tag{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:2px;padding:4px 10px;border:1px solid var(--dim2);border-radius:2px;text-transform:uppercase}
+.products{display:grid;gap:12px;margin-bottom:36px}
+.pcard{background:var(--bg2);border:1px solid var(--dim2);border-radius:6px;overflow:hidden;transition:border-color 0.2s}
+.pcard:hover{border-color:rgba(0,229,255,0.25)}
+.pcard.starred{border-color:rgba(240,192,64,0.4)}
+.pcard-header{display:flex;justify-content:space-between;align-items:flex-start;padding:20px 22px 14px;gap:12px}
+.pcard-left{flex:1}
+.pcard-origin{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.o-flag{font-size:16px}
+.o-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase}
+.pcard-name{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:1px;line-height:1;margin-bottom:8px}
+.pcard-desc{font-size:12px;color:var(--dim);line-height:1.65}
+.score-col{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px}
+.star-badge{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1px;background:var(--gold-dim);color:var(--gold);border:1px solid rgba(240,192,64,0.3);border-radius:2px;padding:2px 8px;text-transform:uppercase;margin-bottom:4px}
+.score-ring{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.3rem;border:2px solid}
+.score-ring.s-high{border-color:var(--green);color:var(--green);background:var(--green-dim)}
+.score-ring.s-mid{border-color:var(--gold);color:var(--gold);background:var(--gold-dim)}
+.score-ring.s-low{border-color:var(--dim);color:var(--dim)}
+.score-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);letter-spacing:1px;text-transform:uppercase}
+.pcard-metrics{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--dim2)}
+@media(max-width:560px){.pcard-metrics{grid-template-columns:repeat(3,1fr)}}
+.metric{padding:12px 14px;border-right:1px solid var(--dim2);text-align:center}
+.metric:last-child{border-right:none}
+.m-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
+.m-val{font-family:'Syne',sans-serif;font-size:13px;font-weight:700}
+.m-val.good{color:var(--green)}
+.m-val.warn{color:var(--gold)}
+.m-val.bad{color:var(--red)}
+.m-val.neu{color:var(--text)}
+.pcard-foot{padding:12px 22px 16px;border-top:1px solid var(--dim2);display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}
+.tag{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:2px;border:1px solid var(--dim2);color:var(--dim)}
+.pcard-insight{width:100%;font-size:11px;color:var(--dim);line-height:1.6;font-style:italic;padding-top:8px;border-top:1px solid var(--dim2);margin-top:4px}
+.insight-box{background:linear-gradient(135deg,#0a0d14,#0d1018);border:1px solid rgba(0,229,255,0.2);border-radius:6px;padding:24px 26px;margin-bottom:32px;position:relative;overflow:hidden}
+.insight-box::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent)}
+.insight-box h3{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px}
+.insight-box p{font-size:13px;color:var(--dim);line-height:1.75}
+.cta-strip{background:var(--bg3);border:1px solid var(--dim2);border-radius:6px;padding:28px 30px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:20px}
+@media(max-width:500px){.cta-strip{grid-template-columns:1fr}}
+.cta-strip h3{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:1px;margin-bottom:6px}
+.cta-strip p{font-size:12px;color:var(--dim);line-height:1.6}
+.btn-wa{flex-shrink:0;display:inline-flex;align-items:center;gap:8px;padding:13px 22px;background:#25D366;color:#fff;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;border-radius:4px;text-decoration:none;transition:background 0.2s;white-space:nowrap}
+.btn-wa:hover{background:#1db954}
+.btn-reset{display:block;margin:24px auto 0;background:none;border:1px solid var(--dim2);color:var(--dim);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:9px 20px;border-radius:2px;cursor:pointer;transition:all 0.15s}
+.btn-reset:hover{border-color:var(--dim);color:var(--text)}
+footer{text-align:center;padding:48px 0 20px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:2px;border-top:1px solid var(--dim2);margin-top:60px}
+footer span{color:var(--accent)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="wrap">
+<header>
+<div class="top-bar">
+<div class="brand-tag">Innovasmart</div>
+<div class="ver-tag">ProductScout v2.0</div>
+</div>
+<h1>PRODUCT<br><span class="hl">SCOUT IA</span></h1>
+<p class="subtitle">La IA analiza el mercado global y te propone los productos mas rentables para importar y vender en Argentina. Sin buscar nada. Solo configura y escanea.</p>
+</header>
+<div class="config-panel">
+<div class="sec-label">Pais de origen</div>
+<div class="countries-grid" id="countriesGrid">
+<button class="cbtn active" data-country="China"><span class="cflag">CN</span><span class="cname">China</span><span class="cnote">Alibaba 1688</span></button>
+<button class="cbtn" data-country="India"><span class="cflag">IN</span><span class="cname">India</span><span class="cnote">IndiaMart</span></button>
+<button class="cbtn" data-country="Turquia"><span class="cflag">TR</span><span class="cname">Turquia</span><span class="cnote">Textil cuero</span></button>
+<button class="cbtn" data-country="Vietnam"><span class="cflag">VN</span><span class="cname">Vietnam</span><span class="cnote">Manufactura</span></button>
+<button class="cbtn" data-country="Brasil"><span class="cflag">BR</span><span class="cname">Brasil</span><span class="cnote">Mercosur</span></button>
+<button class="cbtn" data-country="Portugal"><span class="cflag">PT</span><span class="cname">Portugal</span><span class="cnote">Europa UE</span></button>
+<button class="cbtn" data-country="Mexico"><span class="cflag">MX</span><span class="cname">Mexico</span><span class="cnote">LATAM</span></button>
+<button class="cbtn" data-country="Taiwan"><span class="cflag">TW</span><span class="cname">Taiwan</span><span class="cnote">Tech</span></button>
+<button class="cbtn" data-country="Corea del Sur"><span class="cflag">KR</span><span class="cname">Corea</span><span class="cnote">K-beauty tech</span></button>
+<button class="cbtn" data-country="Japon"><span class="cflag">JP</span><span class="cname">Japon</span><span class="cnote">Calidad</span></button>
+<button class="cbtn" data-country="Estados Unidos"><span class="cflag">US</span><span class="cname">EEUU</span><span class="cnote">Tendencias</span></button>
+<button class="cbtn" data-country="Italia"><span class="cflag">IT</span><span class="cname">Italia</span><span class="cnote">Moda diseno</span></button>
+</div>
+<div class="sec-label">Configuracion</div>
+<div class="filters-row">
+<div class="fwrap"><select id="capital"><option value="">Capital disponible</option><option value="500 a 1500 USD">500 a 1500</option><option value="1500 a 5000 USD">1500 a 5000</option><option value="5000 a 15000 USD">5000 a 15000</option><option value="mas de 15000 USD">mas de 15000</option></select></div>
+<div class="fwrap"><select id="canal"><option value="">Canal de venta</option><option value="Mercado Libre">Mercado Libre</option><option value="Instagram y TikTok">Instagram TikTok</option><option value="negocio fisico">Local fisico</option><option value="venta mayorista">Mayorista</option><option value="ecommerce propio">E-commerce propio</option></select></div>
+<div class="fwrap"><select id="nicho"><option value="">Categoria preferida</option><option value="tecnologia y gadgets">Tecnologia Gadgets</option><option value="hogar y decoracion">Hogar Deco</option><option value="belleza y cuidado personal">Belleza Estetica</option><option value="deportes y outdoor">Deportes</option><option value="mascotas">Mascotas</option><option value="moda y accesorios">Moda Accesorios</option><option value="alimentacion y cocina">Cocina Alimentos</option><option value="cualquier categoria rentable">Sin preferencia</option></select></div>
+<div class="fwrap"><select id="riesgo"><option value="">Tolerancia al riesgo</option><option value="conservador prefiero productos probados">Conservador</option><option value="moderado acepto algo de incertidumbre">Moderado</option><option value="agresivo busco el proximo trend">Agresivo</option></select></div>
+</div>
+<div class="chips-section">
+<div class="sec-label">Criterios de filtro</div>
+<div class="chips-flex">
+<span class="chip active" data-val="liviano y pequeno menos de 500g">Liviano y pequeno</span>
+<span class="chip active" data-val="no fragil">No fragil</span>
+<span class="chip active" data-val="sin certificacion IRAM requerida">Sin intervencion</span>
+<span class="chip active" data-val="no saturado en Argentina">No saturado AR</span>
+<span class="chip active" data-val="alta rotacion y demanda constante">Alta rotacion</span>
+<span class="chip gold active" data-val="tendencia validada en EEUU o Europa que aun no exploto en Argentina">Trend EEUU Europa</span>
+<span class="chip gold" data-val="margen de ganancia superior al 200 por ciento">Margen 200%</span>
+<span class="chip" data-val="producto innovador o diferenciador">Innovador</span>
+<span class="chip" data-val="apto para regalo o packaging atractivo">Apto regalo</span>
+<span class="chip" data-val="demanda creciente en Argentina post 2024">Demanda creciente</span>
+<span class="chip" data-val="ticket de compra bajo facil de escalar">Escalable</span>
+</div>
+</div>
+<div class="err" id="errMsg"></div>
+<div class="scan-wrap">
+<button class="scan-btn" id="scanBtn" onclick="runScan()">
+<span class="s-text">ESCANEAR MERCADO GLOBAL</span>
+<span class="s-loader"></span>
+</button>
+<p class="scan-hint">Analisis de demanda argentina margenes riesgo regulatorio aprox 15 seg</p>
+</div>
+</div>
+<div id="results">
+<div class="results-bar">
+<h2>OPORTUNIDADES <span id="resLabel">DETECTADAS</span></h2>
+<div class="meta-tags" id="metaTags"></div>
+</div>
+<div class="insight-box" id="insightBox"></div>
+<div class="products" id="productsList"></div>
+<div class="cta-strip">
+<div>
+<h3>Encontraste algo interesante?</h3>
+<p>Te ayudo a validar el producto, conseguir el proveedor correcto y calcular la operacion completa. Asesoria personalizada con Matias.</p>
+</div>
+<a href="https://wa.me/541160374306?text=Hola%20Matias%2C%20use%20ProductScout%20y%20quiero%20validar%20un%20producto" class="btn-wa" target="_blank">Hablar con Matias</a>
+</div>
+<button class="btn-reset" onclick="resetAll()">NUEVO ESCANEO</button>
+</div>
+</div>
+<footer>2026 <span>INNOVASMART</span> TODOS LOS DERECHOS RESERVADOS</footer>
+<script>
+document.querySelectorAll('.cbtn').forEach(function(b){b.addEventListener('click',function(){b.classList.toggle('active');});});
+document.querySelectorAll('.chip').forEach(function(c){c.addEventListener('click',function(){c.classList.toggle('active');});});
+async function runScan(){
+var countries=Array.from(document.querySelectorAll('.cbtn.active')).map(function(b){return b.dataset.country;});
+var criteria=Array.from(document.querySelectorAll('.chip.active')).map(function(c){return c.dataset.val;});
+var capital=document.getElementById('capital').value;
+var canal=document.getElementById('canal').value;
+var nicho=document.getElementById('nicho').value;
+var riesgo=document.getElementById('riesgo').value;
+var err=document.getElementById('errMsg');
+err.style.display='none';
+if(!countries.length){err.textContent='ERROR: Selecciona al menos un pais de origen.';err.style.display='block';return;}
+var btn=document.getElementById('scanBtn');
+btn.disabled=true;btn.classList.add('loading');
+try{
+var response=await fetch('/api/scout',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({countries:countries,criteria:criteria,capital:capital,canal:canal,nicho:nicho,riesgo:riesgo})
+});
+if(!response.ok)throw new Error('Error servidor');
+var parsed=await response.json();
+renderResults(parsed,countries,canal,nicho);
+}catch(e){
+err.textContent='ERROR: No se pudo completar el analisis. Intenta de nuevo.';
+err.style.display='block';
+btn.disabled=false;btn.classList.remove('loading');
+}
+}
+function renderResults(data,countries,canal,nicho){
+var mt=document.getElementById('metaTags');
+mt.innerHTML='';
+countries.forEach(function(c){var t=document.createElement('span');t.className='meta-tag';t.textContent=c;mt.appendChild(t);});
+if(canal){var t=document.createElement('span');t.className='meta-tag';t.textContent=canal;mt.appendChild(t);}
+if(nicho){var t=document.createElement('span');t.className='meta-tag';t.textContent=nicho;mt.appendChild(t);}
+document.getElementById('resLabel').textContent=(data.productos.length+' '+( data.label||'resultados')).toUpperCase();
+document.getElementById('insightBox').innerHTML='<h3>Analisis estrategico</h3><p>'+data.analisis+'</p>';
+var list=document.getElementById('productsList');
+list.innerHTML='';
+data.productos.forEach(function(p){
+var card=document.createElement('div');
+card.className='pcard'+(p.estrella?' starred':'');
+card.innerHTML=
+'<div class="pcard-header">'+
+'<div class="pcard-left">'+
+'<div class="pcard-origin"><span class="o-flag">'+p.bandera+'</span><span class="o-label">'+p.pais+'</span></div>'+
+'<div class="pcard-name">'+p.nombre+'</div>'+
+'<div class="pcard-desc">'+p.descripcion+'</div>'+
+'</div>'+
+'<div class="score-col">'+
+(p.estrella?'<div class="star-badge">TOP PICK</div>':'')+
+'<div class="score-ring '+p.scoreTipo+'">'+p.score+'</div>'+
+'<div class="score-lbl">Score</div>'+
+'</div>'+
+'</div>'+
+'<div class="pcard-metrics">'+
+'<div class="metric"><div class="m-lbl">Margen</div><div class="m-val '+p.margenTipo+'">'+p.margen+'</div></div>'+
+'<div class="metric"><div class="m-lbl">Demanda AR</div><div class="m-val '+p.demandaTipo+'">'+p.demanda+'</div></div>'+
+'<div class="metric"><div class="m-lbl">Competencia</div><div class="m-val '+p.competenciaTipo+'">'+p.competencia+'</div></div>'+
+'<div class="metric"><div class="m-lbl">Riesgo</div><div class="m-val '+p.riesgoTipo+'">'+p.riesgo+'</div></div>'+
+'<div class="metric"><div class="m-lbl">Ticket FOB</div><div class="m-val neu">'+p.ticket+'</div></div>'+
+'</div>'+
+'<div class="pcard-foot">'+
+p.tags.map(function(t){return'<span class="tag">'+t+'</span>';}).join('')+
+'<div class="pcard-insight">'+p.insight+'</div>'+
+'</div>';
+list.appendChild(card);
+});
+document.querySelector('.config-panel').style.display='none';
+document.querySelector('header').style.display='none';
+var r=document.getElementById('results');
+r.classList.add('on');
+window.scrollTo({top:0,behavior:'smooth'});
+}
+function resetAll(){
+document.querySelector('.config-panel').style.display='block';
+document.querySelector('header').style.display='block';
+document.getElementById('results').classList.remove('on');
+document.getElementById('errMsg').style.display='none';
+var btn=document.getElementById('scanBtn');
+btn.disabled=false;btn.classList.remove('loading');
+window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
