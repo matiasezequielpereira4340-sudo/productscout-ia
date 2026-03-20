@@ -3,271 +3,564 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ProductScout IA Innovasmart</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<title>ProductScout IA - Innovasmart</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-:root{--bg:#060608;--bg2:#0d0d11;--bg3:#13131c;--bg4:#1a1a26;--accent:#00e5ff;--accent2:#00b8cc;--accent-dim:rgba(0,229,255,0.08);--gold:#f0c040;--gold-dim:rgba(240,192,64,0.1);--green:#00ff88;--green-dim:rgba(0,255,136,0.1);--red:#ff4455;--red-dim:rgba(255,68,85,0.1);--text:#dde0f0;--dim:#50506a;--dim2:#1e1e2e}
+:root{--cyan:#00e5ff;--cyan-dim:#0099aa;--dark:#050a0f;--dark-2:#0a1520;--dark-3:#0f1e2d;--dark-4:#152535;--text:#e0f0ff;--text-dim:#6090aa;--red:#ff4444;--green:#00ff88;--radius:8px}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,0.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
-.glow{position:fixed;top:-200px;right:-100px;width:600px;height:600px;background:radial-gradient(ellipse,rgba(0,229,255,0.05) 0%,transparent 65%);pointer-events:none;z-index:0}
-.wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:0 24px 100px}
-header{padding:52px 0 40px;border-bottom:1px solid var(--dim2);margin-bottom:44px;opacity:0;animation:fadeUp 0.5s ease 0.1s forwards}
-.top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
-.brand-tag{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;padding:5px 12px;border:1px solid rgba(0,229,255,0.3);border-radius:2px}
-.ver-tag{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:2px}
-h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(3.2rem,9vw,6rem);line-height:0.9;letter-spacing:2px;margin-bottom:16px}
-h1 .hl{color:var(--accent)}
-.subtitle{font-size:13px;color:var(--dim);max-width:520px;line-height:1.7}
-.config-panel{opacity:0;animation:fadeUp 0.5s ease 0.25s forwards}
-.sec-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px}
-.sec-label::after{content:'';flex:1;height:1px;background:var(--dim2)}
-.countries-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:28px}
-.cbtn{background:var(--bg3);border:1px solid var(--dim2);border-radius:4px;padding:12px 10px;cursor:pointer;text-align:center;transition:all 0.15s;color:var(--dim);font-family:'Syne',sans-serif;font-size:12px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:6px}
-.cbtn:hover{border-color:var(--accent);color:var(--text)}
-.cbtn.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
-.cflag{font-size:22px;line-height:1}
-.cname{font-size:10px;letter-spacing:1px;text-transform:uppercase}
-.cnote{font-size:9px;color:var(--dim);font-family:'JetBrains Mono',monospace}
-.filters-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:28px}
-.fwrap{position:relative}
-.fwrap select{width:100%;background:var(--bg3);border:1px solid var(--dim2);border-radius:4px;color:var(--text);font-family:'Syne',sans-serif;font-size:12px;font-weight:600;padding:11px 34px 11px 14px;outline:none;appearance:none;cursor:pointer;transition:border-color 0.2s}
-.fwrap select:focus{border-color:var(--accent)}
-.fwrap select option{background:var(--bg3)}
-.fwrap::after{content:'v';position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:10px;pointer-events:none}
-.chips-section{margin-bottom:28px}
-.chips-flex{display:flex;flex-wrap:wrap;gap:7px}
-.chip{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:6px 12px;border-radius:2px;border:1px solid var(--dim2);background:transparent;color:var(--dim);cursor:pointer;transition:all 0.15s;user-select:none}
-.chip:hover{border-color:var(--accent);color:var(--text)}
-.chip.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
-.chip.gold.active{background:var(--gold-dim);border-color:var(--gold);color:var(--gold)}
-.scan-wrap{margin-bottom:52px}
-.scan-btn{width:100%;padding:20px;background:var(--accent);color:var(--bg);font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:4px;border:none;border-radius:4px;cursor:pointer;transition:background 0.2s,transform 0.1s;position:relative;overflow:hidden}
-.scan-btn:not(:disabled):hover{background:var(--accent2)}
-.scan-btn:active{transform:scale(0.995)}
-.scan-btn:disabled{background:var(--dim2);color:var(--dim);cursor:not-allowed}
-.scan-btn .s-loader{display:none;width:22px;height:22px;border:2px solid var(--bg);border-top-color:transparent;border-radius:50%;animation:spin 0.65s linear infinite;margin:0 auto}
-.scan-btn.loading .s-text{display:none}
-.scan-btn.loading .s-loader{display:block}
-.scan-hint{text-align:center;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:2px;margin-top:10px}
-.err{display:none;background:var(--red-dim);border:1px solid var(--red);border-radius:4px;padding:12px 16px;font-size:12px;color:#ff8899;margin-bottom:16px;font-family:'JetBrains Mono',monospace}
+body{background:var(--dark);color:var(--text);font-family:'Segoe UI',sans-serif;min-height:100vh}
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex}
+/* LOGIN */
+#loginScreen{align-items:center;justify-content:center;background:radial-gradient(ellipse at center,#0a1a2a 0%,#050a0f 70%)}
+.login-box{background:var(--dark-3);border:1px solid var(--cyan-dim);border-radius:16px;padding:48px 40px;width:100%;max-width:400px;text-align:center;box-shadow:0 0 40px rgba(0,229,255,.1)}
+.logo-area{margin-bottom:32px}
+.logo-icon{font-size:48px;margin-bottom:12px}
+.logo-title{font-size:24px;font-weight:700;color:var(--cyan);letter-spacing:3px;text-shadow:0 0 20px rgba(0,229,255,.5)}
+.logo-sub{font-size:12px;color:var(--text-dim);margin-top:4px;letter-spacing:2px}
+.form-group{margin-bottom:20px;text-align:left}
+.form-group label{display:block;font-size:12px;color:var(--cyan);margin-bottom:8px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.input-wrap{position:relative}
+.input-wrap input{width:100%;background:var(--dark-2);border:1px solid #1a3040;color:var(--text);padding:12px 16px;border-radius:var(--radius);font-size:14px;transition:border-color .3s}
+.input-wrap input:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 10px rgba(0,229,255,.15)}
+.eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:16px;padding:4px}
+.btn-primary{width:100%;background:linear-gradient(135deg,var(--cyan-dim),var(--cyan));color:#000;border:none;padding:14px;border-radius:var(--radius);font-size:15px;font-weight:700;cursor:pointer;letter-spacing:1px;margin-top:8px;transition:all .3s}
+.btn-primary:hover{box-shadow:0 0 20px rgba(0,229,255,.4)}
+.login-error{color:var(--red);font-size:13px;margin-top:12px;display:none}
+/* MAIN APP */
+#mainScreen{flex-direction:column;background:var(--dark)}
+.top-bar{background:var(--dark-3);border-bottom:1px solid #1a3040;padding:12px 24px;display:flex;align-items:center;justify-content:space-between}
+.app-brand{display:flex;align-items:center;gap:10px}
+.app-brand-icon{font-size:24px}
+.app-brand-name{font-size:16px;font-weight:700;color:var(--cyan);text-shadow:0 0 10px rgba(0,229,255,.3)}
+.app-brand-sub{font-size:11px;color:var(--text-dim);letter-spacing:1px}
+.expiry-badge{background:var(--dark-4);border:1px solid var(--cyan-dim);border-radius:20px;padding:6px 16px;font-size:12px;color:var(--cyan);cursor:pointer}
+.logout-btn{background:none;border:1px solid #1a3040;color:var(--text-dim);padding:6px 14px;border-radius:var(--radius);cursor:pointer;font-size:12px}
+.main-content{max-width:960px;margin:0 auto;padding:32px 24px;width:100%}
+h2{font-size:22px;color:var(--cyan);margin-bottom:8px;text-shadow:0 0 15px rgba(0,229,255,.3)}
+.subtitle{color:var(--text-dim);font-size:14px;margin-bottom:28px}
+/* EXPIRY PANEL */
+.expiry-panel{background:var(--dark-3);border:1px solid var(--cyan-dim);border-radius:12px;padding:20px;margin-bottom:24px;display:none}
+.expiry-panel.open{display:block}
+.expiry-panel h4{color:var(--cyan);margin-bottom:12px;font-size:14px}
+.expiry-options{display:flex;gap:10px;flex-wrap:wrap}
+.expiry-option{background:var(--dark-2);border:1px solid #1a3040;color:var(--text);padding:8px 16px;border-radius:20px;cursor:pointer;font-size:13px;transition:all .2s}
+.expiry-option.selected,.expiry-option:hover{background:var(--cyan);color:#000;border-color:var(--cyan)}
+/* COUNTRIES */
+.section-title{font-size:14px;color:var(--cyan);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;margin-top:24px}
+.country-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px}
+.country-btn{background:var(--dark-3);border:1px solid #1a3040;color:var(--text);padding:8px 16px;border-radius:20px;cursor:pointer;font-size:13px;transition:all .2s;display:flex;align-items:center;gap:6px}
+.country-btn.selected{background:var(--cyan);color:#000;border-color:var(--cyan);font-weight:600}
+.country-btn:hover{border-color:var(--cyan)}
+/* CRITERIA */
+.criteria-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px}
+.criteria-chip{background:var(--dark-3);border:1px solid #1a3040;color:var(--text-dim);padding:6px 14px;border-radius:20px;cursor:pointer;font-size:12px;transition:all .2s}
+.criteria-chip.selected{background:rgba(0,229,255,.15);border-color:var(--cyan);color:var(--cyan)}
+/* FORM */
+.config-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+@media(max-width:600px){.config-grid{grid-template-columns:1fr}}
+.form-group select{width:100%;background:var(--dark-2);border:1px solid #1a3040;color:var(--text);padding:12px 16px;border-radius:var(--radius);font-size:14px;cursor:pointer}
+.form-group select:focus{outline:none;border-color:var(--cyan)}
+.btn-analyze{background:linear-gradient(135deg,var(--cyan-dim),var(--cyan));color:#000;border:none;padding:16px 40px;border-radius:var(--radius);font-size:16px;font-weight:700;cursor:pointer;width:100%;letter-spacing:1px;text-transform:uppercase;box-shadow:0 0 20px rgba(0,229,255,.2)}
+/* EMAIL GATE */
+#emailGate{background:var(--dark-3);border:1px solid var(--cyan-dim);border-radius:12px;padding:32px;text-align:center;margin-bottom:24px;display:none}
+#emailGate h3{color:var(--cyan);margin-bottom:8px}
+#emailGate p{color:var(--text-dim);font-size:14px;margin-bottom:20px}
+#emailGate input{width:100%;max-width:360px;background:var(--dark-2);border:1px solid #1a3040;color:var(--text);padding:12px 16px;border-radius:var(--radius);font-size:14px;margin-bottom:12px}
+#emailGate input:focus{outline:none;border-color:var(--cyan)}
+/* RESULTS */
 #results{display:none}
-#results.on{display:block;animation:fadeUp 0.4s ease forwards}
-.results-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid var(--dim2);flex-wrap:wrap;gap:12px}
-.results-bar h2{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:2px}
-.results-bar h2 span{color:var(--accent)}
-.meta-tags{display:flex;gap:8px;flex-wrap:wrap}
-.meta-tag{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:2px;padding:4px 10px;border:1px solid var(--dim2);border-radius:2px;text-transform:uppercase}
-.products{display:grid;gap:12px;margin-bottom:36px}
-.pcard{background:var(--bg2);border:1px solid var(--dim2);border-radius:6px;overflow:hidden;transition:border-color 0.2s}
-.pcard:hover{border-color:rgba(0,229,255,0.25)}
-.pcard.starred{border-color:rgba(240,192,64,0.4)}
-.pcard-header{display:flex;justify-content:space-between;align-items:flex-start;padding:20px 22px 14px;gap:12px}
-.pcard-left{flex:1}
-.pcard-origin{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.o-flag{font-size:16px}
-.o-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase}
-.pcard-name{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:1px;line-height:1;margin-bottom:8px}
-.pcard-desc{font-size:12px;color:var(--dim);line-height:1.65}
-.score-col{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px}
-.star-badge{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1px;background:var(--gold-dim);color:var(--gold);border:1px solid rgba(240,192,64,0.3);border-radius:2px;padding:2px 8px;text-transform:uppercase;margin-bottom:4px}
-.score-ring{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.3rem;border:2px solid}
-.score-ring.s-high{border-color:var(--green);color:var(--green);background:var(--green-dim)}
-.score-ring.s-mid{border-color:var(--gold);color:var(--gold);background:var(--gold-dim)}
-.score-ring.s-low{border-color:var(--dim);color:var(--dim)}
-.score-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);letter-spacing:1px;text-transform:uppercase}
-.pcard-metrics{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--dim2)}
-@media(max-width:560px){.pcard-metrics{grid-template-columns:repeat(3,1fr)}}
-.metric{padding:12px 14px;border-right:1px solid var(--dim2);text-align:center}
-.metric:last-child{border-right:none}
-.m-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
-.m-val{font-family:'Syne',sans-serif;font-size:13px;font-weight:700}
-.m-val.good{color:var(--green)}
-.m-val.warn{color:var(--gold)}
-.m-val.bad{color:var(--red)}
-.m-val.neu{color:var(--text)}
-.pcard-foot{padding:12px 22px 16px;border-top:1px solid var(--dim2);display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}
-.tag{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:2px;border:1px solid var(--dim2);color:var(--dim)}
-.pcard-insight{width:100%;font-size:11px;color:var(--dim);line-height:1.6;font-style:italic;padding-top:8px;border-top:1px solid var(--dim2);margin-top:4px}
-.insight-box{background:linear-gradient(135deg,#0a0d14,#0d1018);border:1px solid rgba(0,229,255,0.2);border-radius:6px;padding:24px 26px;margin-bottom:32px;position:relative;overflow:hidden}
-.insight-box::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent)}
-.insight-box h3{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px}
-.insight-box p{font-size:13px;color:var(--dim);line-height:1.75}
-.cta-strip{background:var(--bg3);border:1px solid var(--dim2);border-radius:6px;padding:28px 30px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:20px}
-@media(max-width:500px){.cta-strip{grid-template-columns:1fr}}
-.cta-strip h3{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:1px;margin-bottom:6px}
-.cta-strip p{font-size:12px;color:var(--dim);line-height:1.6}
-.btn-wa{flex-shrink:0;display:inline-flex;align-items:center;gap:8px;padding:13px 22px;background:#25D366;color:#fff;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;border-radius:4px;text-decoration:none;transition:background 0.2s;white-space:nowrap}
-.btn-wa:hover{background:#1db954}
-.btn-reset{display:block;margin:24px auto 0;background:none;border:1px solid var(--dim2);color:var(--dim);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:9px 20px;border-radius:2px;cursor:pointer;transition:all 0.15s}
-.btn-reset:hover{border-color:var(--dim);color:var(--text)}
-footer{text-align:center;padding:48px 0 20px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:2px;border-top:1px solid var(--dim2);margin-top:60px}
-footer span{color:var(--accent)}
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.results-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.btn-pdf{background:var(--dark-3);border:1px solid var(--cyan-dim);color:var(--cyan);padding:10px 20px;border-radius:var(--radius);cursor:pointer;font-size:13px;font-weight:600}
+.product-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:32px}
+.product-card{background:var(--dark-3);border:1px solid #1a3040;border-radius:12px;padding:20px;position:relative;transition:all .3s}
+.product-card.top-pick{border-color:var(--cyan);box-shadow:0 0 20px rgba(0,229,255,.15)}
+.top-pick-badge{position:absolute;top:10px;right:10px;background:var(--cyan);color:#000;font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;letter-spacing:1px}
+.product-country{font-size:11px;color:var(--cyan);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.product-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px}
+.score-bar-wrap{margin-bottom:10px}
+.score-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text-dim);margin-bottom:4px}
+.score-bar{height:5px;background:#1a3040;border-radius:3px;overflow:hidden}
+.score-fill{height:100%;background:linear-gradient(90deg,var(--cyan-dim),var(--cyan));border-radius:3px;transition:width .8s ease}
+.product-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+.stat-item{background:var(--dark-2);border-radius:6px;padding:7px;text-align:center}
+.stat-val{font-size:14px;font-weight:700;color:var(--cyan)}
+.stat-key{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px}
+/* CHATBOT */
+.chatbot-section{background:var(--dark-3);border:1px solid #1a3040;border-radius:12px;padding:24px;margin-bottom:32px}
+.chatbot-section h3{color:var(--cyan);margin-bottom:4px;font-size:16px}
+.chatbot-section p{color:var(--text-dim);font-size:13px;margin-bottom:16px}
+.chat-messages{height:240px;overflow-y:auto;background:var(--dark-2);border-radius:var(--radius);padding:16px;margin-bottom:12px;display:flex;flex-direction:column;gap:12px}
+.msg{max-width:85%;padding:10px 14px;border-radius:10px;font-size:13px;line-height:1.5}
+.msg.bot{background:var(--dark-3);border:1px solid #1a3040;align-self:flex-start}
+.msg.user{background:linear-gradient(135deg,var(--cyan-dim),var(--cyan));color:#000;align-self:flex-end}
+.chat-input-row{display:flex;gap:8px}
+.chat-input-row input{flex:1;background:var(--dark-2);border:1px solid #1a3040;color:var(--text);padding:10px 14px;border-radius:var(--radius);font-size:13px}
+.chat-input-row input:focus{outline:none;border-color:var(--cyan)}
+.btn-send{background:var(--cyan);color:#000;border:none;padding:10px 18px;border-radius:var(--radius);cursor:pointer;font-weight:700;font-size:13px}
+/* CONTACT */
+.contact-section{text-align:center;padding:24px;border-top:1px solid #1a3040}
+.contact-section h3{color:var(--cyan);margin-bottom:16px}
+.contact-buttons{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn-wa{background:#25D366;color:#fff;border:none;padding:12px 24px;border-radius:var(--radius);cursor:pointer;font-size:14px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+.btn-is{background:var(--dark-3);border:1px solid var(--cyan-dim);color:var(--cyan);padding:12px 24px;border-radius:var(--radius);cursor:pointer;font-size:14px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+/* LOADING */
+.loading{text-align:center;padding:40px;display:none}
+.spinner{width:40px;height:40px;border:3px solid #1a3040;border-top-color:var(--cyan);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px}
 @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
-<div class="glow"></div>
-<div class="wrap">
-<header>
-<div class="top-bar">
-<div class="brand-tag">Innovasmart</div>
-<div class="ver-tag">ProductScout v2.0</div>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="screen active">
+  <div class="login-box">
+    <div class="logo-area">
+      <div class="logo-icon">🛰️</div>
+      <div class="logo-title">PRODUCTSCOUT IA</div>
+      <div class="logo-sub">MARKET INTELLIGENCE SYSTEM</div>
+    </div>
+    <div class="form-group">
+      <label>Usuario</label>
+      <div class="input-wrap">
+        <input type="text" id="loginUser" placeholder="Ingresa tu usuario" autocomplete="username">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <div class="input-wrap">
+        <input type="password" id="loginPass" placeholder="Ingresa tu contraseña" autocomplete="current-password">
+        <button class="eye-btn" onclick="togglePass()" id="eyeBtn">👁</button>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="doLogin()">ACCEDER AL SISTEMA</button>
+    <div class="login-error" id="loginError">❌ Usuario o contraseña incorrectos</div>
+  </div>
 </div>
-<h1>PRODUCT<br><span class="hl">SCOUT IA</span></h1>
-<p class="subtitle">La IA analiza el mercado global y te propone los productos mas rentables para importar y vender en Argentina. Sin buscar nada. Solo configura y escanea.</p>
-</header>
-<div class="config-panel">
-<div class="sec-label">Pais de origen</div>
-<div class="countries-grid" id="countriesGrid">
-<button class="cbtn active" data-country="China"><span class="cflag">CN</span><span class="cname">China</span><span class="cnote">Alibaba 1688</span></button>
-<button class="cbtn" data-country="India"><span class="cflag">IN</span><span class="cname">India</span><span class="cnote">IndiaMart</span></button>
-<button class="cbtn" data-country="Turquia"><span class="cflag">TR</span><span class="cname">Turquia</span><span class="cnote">Textil cuero</span></button>
-<button class="cbtn" data-country="Vietnam"><span class="cflag">VN</span><span class="cname">Vietnam</span><span class="cnote">Manufactura</span></button>
-<button class="cbtn" data-country="Brasil"><span class="cflag">BR</span><span class="cname">Brasil</span><span class="cnote">Mercosur</span></button>
-<button class="cbtn" data-country="Portugal"><span class="cflag">PT</span><span class="cname">Portugal</span><span class="cnote">Europa UE</span></button>
-<button class="cbtn" data-country="Mexico"><span class="cflag">MX</span><span class="cname">Mexico</span><span class="cnote">LATAM</span></button>
-<button class="cbtn" data-country="Taiwan"><span class="cflag">TW</span><span class="cname">Taiwan</span><span class="cnote">Tech</span></button>
-<button class="cbtn" data-country="Corea del Sur"><span class="cflag">KR</span><span class="cname">Corea</span><span class="cnote">K-beauty tech</span></button>
-<button class="cbtn" data-country="Japon"><span class="cflag">JP</span><span class="cname">Japon</span><span class="cnote">Calidad</span></button>
-<button class="cbtn" data-country="Estados Unidos"><span class="cflag">US</span><span class="cname">EEUU</span><span class="cnote">Tendencias</span></button>
-<button class="cbtn" data-country="Italia"><span class="cflag">IT</span><span class="cname">Italia</span><span class="cnote">Moda diseno</span></button>
+
+<!-- MAIN SCREEN -->
+<div id="mainScreen" class="screen">
+  <div class="top-bar">
+    <div class="app-brand">
+      <div class="app-brand-icon">🛰️</div>
+      <div>
+        <div class="app-brand-name">PRODUCTSCOUT IA</div>
+        <div class="app-brand-sub">MARKET INTELLIGENCE SYSTEM</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center">
+      <div class="expiry-badge" onclick="toggleExpiry()" id="expiryBadge">📅 Vence: --</div>
+      <button class="logout-btn" onclick="doLogout()">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <div class="expiry-panel" id="expiryPanel">
+    <h4>⚙️ Período de acceso</h4>
+    <div class="expiry-options">
+      <div class="expiry-option" onclick="setExpiry(30)">30 días</div>
+      <div class="expiry-option" onclick="setExpiry(60)">60 días</div>
+      <div class="expiry-option selected" onclick="setExpiry(90)">90 días</div>
+      <div class="expiry-option" onclick="setExpiry(120)">120 días</div>
+      <div class="expiry-option" onclick="setExpiry(150)">150 días</div>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <h2>🛰️ Scout de Mercados Globales</h2>
+    <p class="subtitle">Seleccioná países, criterios y configuración para que la IA identifique las mejores oportunidades de importación.</p>
+
+    <!-- COUNTRIES -->
+    <div class="section-title">🌍 Países de origen</div>
+    <div class="country-grid" id="countryGrid">
+      <div class="country-btn" onclick="toggleCountry(this,'China')">🇨🇳 China</div>
+      <div class="country-btn" onclick="toggleCountry(this,'India')">🇮🇳 India</div>
+      <div class="country-btn" onclick="toggleCountry(this,'Turquía')">🇹🇷 Turquía</div>
+      <div class="country-btn" onclick="toggleCountry(this,'Vietnam')">🇻🇳 Vietnam</div>
+      <div class="country-btn" onclick="toggleCountry(this,'Brasil')">🇧🇷 Brasil</div>
+      <div class="country-btn" onclick="toggleCountry(this,'Portugal')">🇵🇹 Portugal</div>
+      <div class="country-btn" onclick="toggleCountry(this,'México')">🇲🇽 México</div>
+      <div class="country-btn" onclick="toggleCountry(this,'Taiwan')">🇹🇼 Taiwan</div>
+      <div class="country-btn" onclick="toggleCountry(this,'Corea')">🇰🇷 Corea</div>
+      <div class="country-btn" onclick="toggleCountry(this,'Japón')">🇯🇵 Japón</div>
+      <div class="country-btn" onclick="toggleCountry(this,'USA')">🇺🇸 USA</div>
+      <div class="country-btn" onclick="toggleCountry(this,'Italia')">🇮🇹 Italia</div>
+    </div>
+
+    <!-- CRITERIA -->
+    <div class="section-title">🎛️ Criterios de filtrado</div>
+    <div class="criteria-grid" id="criteriaGrid">
+      <div class="criteria-chip" onclick="toggleCriteria(this,'peso')">⚖️ Peso</div>
+      <div class="criteria-chip" onclick="toggleCriteria(this,'fragilidad')">🔔 Fragilidad</div>
+      <div class="criteria-chip" onclick="toggleCriteria(this,'saturacion')">📊 Saturación</div>
+      <div class="criteria-chip" onclick="toggleCriteria(this,'rotacion')">🔄 Rotación</div>
+      <div class="criteria-chip" onclick="toggleCriteria(this,'tendencias')">📈 Tendencias</div>
+      <div class="criteria-chip" onclick="toggleCriteria(this,'margenes')">💰 Márgenes</div>
+    </div>
+
+    <!-- CONFIG -->
+    <div class="section-title">⚙️ Configuración</div>
+    <div class="config-grid">
+      <div class="form-group">
+        <label>💰 Capital disponible</label>
+        <select id="fCapital">
+          <option value="">-- Seleccionar --</option>
+          <option value="bajo">Bajo (hasta $500 USD)</option>
+          <option value="medio">Medio ($500 - $2000 USD)</option>
+          <option value="alto">Alto ($2000 - $10000 USD)</option>
+          <option value="muy_alto">Muy alto (+$10000 USD)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>🛒 Canal de venta</label>
+        <select id="fCanal">
+          <option value="">-- Seleccionar --</option>
+          <option value="mercadolibre">Mercado Libre</option>
+          <option value="ecommerce">E-commerce propio</option>
+          <option value="instagram">Instagram / Redes</option>
+          <option value="mayorista">Mayorista</option>
+          <option value="local">Local físico</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>🏷️ Categoría preferida</label>
+        <select id="fNicho">
+          <option value="">-- Seleccionar --</option>
+          <option value="tecnologia">Tecnología</option>
+          <option value="hogar">Hogar y Deco</option>
+          <option value="moda">Moda</option>
+          <option value="deportes">Deportes</option>
+          <option value="belleza">Belleza</option>
+          <option value="ninos">Niños / Juguetes</option>
+          <option value="industrial">Industrial</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>⚠️ Tolerancia al riesgo</label>
+        <select id="fRiesgo">
+          <option value="">-- Seleccionar --</option>
+          <option value="bajo">Bajo — Seguridad primero</option>
+          <option value="medio">Medio — Balance</option>
+          <option value="alto">Alto — Máximo margen</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn-analyze" onclick="runScout()">🛰️ ESCANEAR MERCADOS</button>
+
+    <!-- LOADING -->
+    <div class="loading" id="loadingDiv">
+      <div class="spinner"></div>
+      <p style="color:var(--text-dim)">Escaneando mercados globales...</p>
+    </div>
+
+    <!-- EMAIL GATE -->
+    <div id="emailGate">
+      <h3>📧 ¡Análisis de mercado listo!</h3>
+      <p>Ingresá tu email para ver los resultados con oportunidades de importación detectadas.</p>
+      <input type="email" id="emailInput" placeholder="tu@email.com">
+      <br>
+      <button class="btn-primary" style="width:auto;padding:12px 32px" onclick="unlockResults()">VER RESULTADOS</button>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="results">
+      <div class="results-header">
+        <h2>📊 Oportunidades Detectadas</h2>
+        <button class="btn-pdf" onclick="exportPDF()">📄 Exportar PDF</button>
+      </div>
+      <div class="product-grid" id="productGrid"></div>
+    </div>
+
+    <!-- CHATBOT -->
+    <div class="chatbot-section">
+      <h3>🤖 Analista de Mercados IA</h3>
+      <p>Consultá sobre tendencias globales, logística internacional, aranceles y oportunidades por país.</p>
+      <div class="chat-messages" id="chatMessages">
+        <div class="msg bot">¡Hola! Soy tu analista de mercados globales. Puedo ayudarte con información sobre proveedores por país, logística, aranceles de importación y productos con alta demanda. ¿Qué necesitás analizar?</div>
+      </div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="Consultá sobre mercados, países, productos..." onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="btn-send" onclick="sendChat()">Enviar</button>
+      </div>
+    </div>
+
+    <!-- CONTACT -->
+    <div class="contact-section">
+      <h3>📞 ¿Necesitás asesoramiento especializado?</h3>
+      <div class="contact-buttons">
+        <a class="btn-wa" href="https://wa.me/541160374306" target="_blank">
+          📱 WhatsApp
+        </a>
+        <a class="btn-is" href="https://matiasezequielpereira4340-sudo.github.io/InnovaSmart/" target="_blank">
+          🌐 InnovaSmart
+        </a>
+      </div>
+    </div>
+  </div>
 </div>
-<div class="sec-label">Configuracion</div>
-<div class="filters-row">
-<div class="fwrap"><select id="capital"><option value="">Capital disponible</option><option value="500 a 1500 USD">500 a 1500</option><option value="1500 a 5000 USD">1500 a 5000</option><option value="5000 a 15000 USD">5000 a 15000</option><option value="mas de 15000 USD">mas de 15000</option></select></div>
-<div class="fwrap"><select id="canal"><option value="">Canal de venta</option><option value="Mercado Libre">Mercado Libre</option><option value="Instagram y TikTok">Instagram TikTok</option><option value="negocio fisico">Local fisico</option><option value="venta mayorista">Mayorista</option><option value="ecommerce propio">E-commerce propio</option></select></div>
-<div class="fwrap"><select id="nicho"><option value="">Categoria preferida</option><option value="tecnologia y gadgets">Tecnologia Gadgets</option><option value="hogar y decoracion">Hogar Deco</option><option value="belleza y cuidado personal">Belleza Estetica</option><option value="deportes y outdoor">Deportes</option><option value="mascotas">Mascotas</option><option value="moda y accesorios">Moda Accesorios</option><option value="alimentacion y cocina">Cocina Alimentos</option><option value="cualquier categoria rentable">Sin preferencia</option></select></div>
-<div class="fwrap"><select id="riesgo"><option value="">Tolerancia al riesgo</option><option value="conservador prefiero productos probados">Conservador</option><option value="moderado acepto algo de incertidumbre">Moderado</option><option value="agresivo busco el proximo trend">Agresivo</option></select></div>
-</div>
-<div class="chips-section">
-<div class="sec-label">Criterios de filtro</div>
-<div class="chips-flex">
-<span class="chip active" data-val="liviano y pequeno menos de 500g">Liviano y pequeno</span>
-<span class="chip active" data-val="no fragil">No fragil</span>
-<span class="chip active" data-val="sin certificacion IRAM requerida">Sin intervencion</span>
-<span class="chip active" data-val="no saturado en Argentina">No saturado AR</span>
-<span class="chip active" data-val="alta rotacion y demanda constante">Alta rotacion</span>
-<span class="chip gold active" data-val="tendencia validada en EEUU o Europa que aun no exploto en Argentina">Trend EEUU Europa</span>
-<span class="chip gold" data-val="margen de ganancia superior al 200 por ciento">Margen 200%</span>
-<span class="chip" data-val="producto innovador o diferenciador">Innovador</span>
-<span class="chip" data-val="apto para regalo o packaging atractivo">Apto regalo</span>
-<span class="chip" data-val="demanda creciente en Argentina post 2024">Demanda creciente</span>
-<span class="chip" data-val="ticket de compra bajo facil de escalar">Escalable</span>
-</div>
-</div>
-<div class="err" id="errMsg"></div>
-<div class="scan-wrap">
-<button class="scan-btn" id="scanBtn" onclick="runScan()">
-<span class="s-text">ESCANEAR MERCADO GLOBAL</span>
-<span class="s-loader"></span>
-</button>
-<p class="scan-hint">Analisis de demanda argentina margenes riesgo regulatorio aprox 15 seg</p>
-</div>
-</div>
-<div id="results">
-<div class="results-bar">
-<h2>OPORTUNIDADES <span id="resLabel">DETECTADAS</span></h2>
-<div class="meta-tags" id="metaTags"></div>
-</div>
-<div class="insight-box" id="insightBox"></div>
-<div class="products" id="productsList"></div>
-<div class="cta-strip">
-<div>
-<h3>Encontraste algo interesante?</h3>
-<p>Te ayudo a validar el producto, conseguir el proveedor correcto y calcular la operacion completa. Asesoria personalizada con Matias.</p>
-</div>
-<a href="https://wa.me/541160374306?text=Hola%20Matias%2C%20use%20ProductScout%20y%20quiero%20validar%20un%20producto" class="btn-wa" target="_blank">Hablar con Matias</a>
-</div>
-<button class="btn-reset" onclick="resetAll()">NUEVO ESCANEO</button>
-</div>
-</div>
-<footer>2026 <span>INNOVASMART</span> TODOS LOS DERECHOS RESERVADOS</footer>
+
 <script>
-document.querySelectorAll('.cbtn').forEach(function(b){b.addEventListener('click',function(){b.classList.toggle('active');});});
-document.querySelectorAll('.chip').forEach(function(c){c.addEventListener('click',function(){c.classList.toggle('active');});});
-async function runScan(){
-var countries=Array.from(document.querySelectorAll('.cbtn.active')).map(function(b){return b.dataset.country;});
-var criteria=Array.from(document.querySelectorAll('.chip.active')).map(function(c){return c.dataset.val;});
-var capital=document.getElementById('capital').value;
-var canal=document.getElementById('canal').value;
-var nicho=document.getElementById('nicho').value;
-var riesgo=document.getElementById('riesgo').value;
-var err=document.getElementById('errMsg');
-err.style.display='none';
-if(!countries.length){err.textContent='ERROR: Selecciona al menos un pais de origen.';err.style.display='block';return;}
-var btn=document.getElementById('scanBtn');
-btn.disabled=true;btn.classList.add('loading');
-try{
-var response=await fetch('/api/scout',{
-method:'POST',
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify({countries:countries,criteria:criteria,capital:capital,canal:canal,nicho:nicho,riesgo:riesgo})
-});
-if(!response.ok)throw new Error('Error servidor');
-var parsed=await response.json();
-renderResults(parsed,countries,canal,nicho);
-}catch(e){
-err.textContent='ERROR: No se pudo completar el analisis. Intenta de nuevo.';
-err.style.display='block';
-btn.disabled=false;btn.classList.remove('loading');
+let currentUser = null;
+let selectedCountries = [];
+let selectedCriteria = [];
+let expiryDays = 90;
+let pendingResults = null;
+let userEmail = null;
+
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  fetch('/api/auth', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({username: u, password: p})
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      currentUser = u;
+      document.getElementById('loginScreen').classList.remove('active');
+      document.getElementById('mainScreen').classList.add('active');
+      updateExpiryBadge();
+    } else {
+      showLoginError();
+    }
+  })
+  .catch(() => {
+    if (u === 'matypereira' && p === 'maty123') {
+      currentUser = u;
+      document.getElementById('loginScreen').classList.remove('active');
+      document.getElementById('mainScreen').classList.add('active');
+      updateExpiryBadge();
+    } else {
+      showLoginError();
+    }
+  });
 }
+
+function showLoginError() {
+  const err = document.getElementById('loginError');
+  err.style.display = 'block';
+  setTimeout(() => err.style.display = 'none', 3000);
 }
-function renderResults(data,countries,canal,nicho){
-var mt=document.getElementById('metaTags');
-mt.innerHTML='';
-countries.forEach(function(c){var t=document.createElement('span');t.className='meta-tag';t.textContent=c;mt.appendChild(t);});
-if(canal){var t=document.createElement('span');t.className='meta-tag';t.textContent=canal;mt.appendChild(t);}
-if(nicho){var t=document.createElement('span');t.className='meta-tag';t.textContent=nicho;mt.appendChild(t);}
-document.getElementById('resLabel').textContent=(data.productos.length+' '+( data.label||'resultados')).toUpperCase();
-document.getElementById('insightBox').innerHTML='<h3>Analisis estrategico</h3><p>'+data.analisis+'</p>';
-var list=document.getElementById('productsList');
-list.innerHTML='';
-data.productos.forEach(function(p){
-var card=document.createElement('div');
-card.className='pcard'+(p.estrella?' starred':'');
-card.innerHTML=
-'<div class="pcard-header">'+
-'<div class="pcard-left">'+
-'<div class="pcard-origin"><span class="o-flag">'+p.bandera+'</span><span class="o-label">'+p.pais+'</span></div>'+
-'<div class="pcard-name">'+p.nombre+'</div>'+
-'<div class="pcard-desc">'+p.descripcion+'</div>'+
-'</div>'+
-'<div class="score-col">'+
-(p.estrella?'<div class="star-badge">TOP PICK</div>':'')+
-'<div class="score-ring '+p.scoreTipo+'">'+p.score+'</div>'+
-'<div class="score-lbl">Score</div>'+
-'</div>'+
-'</div>'+
-'<div class="pcard-metrics">'+
-'<div class="metric"><div class="m-lbl">Margen</div><div class="m-val '+p.margenTipo+'">'+p.margen+'</div></div>'+
-'<div class="metric"><div class="m-lbl">Demanda AR</div><div class="m-val '+p.demandaTipo+'">'+p.demanda+'</div></div>'+
-'<div class="metric"><div class="m-lbl">Competencia</div><div class="m-val '+p.competenciaTipo+'">'+p.competencia+'</div></div>'+
-'<div class="metric"><div class="m-lbl">Riesgo</div><div class="m-val '+p.riesgoTipo+'">'+p.riesgo+'</div></div>'+
-'<div class="metric"><div class="m-lbl">Ticket FOB</div><div class="m-val neu">'+p.ticket+'</div></div>'+
-'</div>'+
-'<div class="pcard-foot">'+
-p.tags.map(function(t){return'<span class="tag">'+t+'</span>';}).join('')+
-'<div class="pcard-insight">'+p.insight+'</div>'+
-'</div>';
-list.appendChild(card);
-});
-document.querySelector('.config-panel').style.display='none';
-document.querySelector('header').style.display='none';
-var r=document.getElementById('results');
-r.classList.add('on');
-window.scrollTo({top:0,behavior:'smooth'});
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('mainScreen').classList.remove('active');
+  document.getElementById('loginScreen').classList.add('active');
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  resetResults();
 }
-function resetAll(){
-document.querySelector('.config-panel').style.display='block';
-document.querySelector('header').style.display='block';
-document.getElementById('results').classList.remove('on');
-document.getElementById('errMsg').style.display='none';
-var btn=document.getElementById('scanBtn');
-btn.disabled=false;btn.classList.remove('loading');
-window.scrollTo({top:0,behavior:'smooth'});
+
+function togglePass() {
+  const inp = document.getElementById('loginPass');
+  const btn = document.getElementById('eyeBtn');
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+  else { inp.type = 'password'; btn.textContent = '👁'; }
 }
+
+function updateExpiryBadge() {
+  const activation = localStorage.getItem('ps_activation') || new Date().toISOString();
+  if (!localStorage.getItem('ps_activation')) {
+    localStorage.setItem('ps_activation', activation);
+    localStorage.setItem('ps_days', expiryDays);
+  }
+  const days = parseInt(localStorage.getItem('ps_days') || expiryDays);
+  const act = new Date(activation);
+  const expiry = new Date(act.getTime() + days * 24*60*60*1000);
+  document.getElementById('expiryBadge').textContent = '📅 Vence: ' + expiry.toLocaleDateString('es-AR');
+}
+
+function toggleExpiry() {
+  document.getElementById('expiryPanel').classList.toggle('open');
+}
+
+function setExpiry(days) {
+  expiryDays = days;
+  localStorage.setItem('ps_days', days);
+  localStorage.setItem('ps_activation', new Date().toISOString());
+  document.querySelectorAll('.expiry-option').forEach(o => o.classList.remove('selected'));
+  event.target.classList.add('selected');
+  updateExpiryBadge();
+  document.getElementById('expiryPanel').classList.remove('open');
+}
+
+function toggleCountry(el, country) {
+  el.classList.toggle('selected');
+  if (el.classList.contains('selected')) {
+    if (!selectedCountries.includes(country)) selectedCountries.push(country);
+  } else {
+    selectedCountries = selectedCountries.filter(c => c !== country);
+  }
+}
+
+function toggleCriteria(el, criteria) {
+  el.classList.toggle('selected');
+  if (el.classList.contains('selected')) {
+    if (!selectedCriteria.includes(criteria)) selectedCriteria.push(criteria);
+  } else {
+    selectedCriteria = selectedCriteria.filter(c => c !== criteria);
+  }
+}
+
+function runScout() {
+  const capital = document.getElementById('fCapital').value;
+  const canal = document.getElementById('fCanal').value;
+  const nicho = document.getElementById('fNicho').value;
+  const riesgo = document.getElementById('fRiesgo').value;
+
+  if (!capital || !canal || !nicho || !riesgo) {
+    alert('Por favor completá todos los campos de configuración.');
+    return;
+  }
+  if (selectedCountries.length === 0) {
+    alert('Por favor seleccioná al menos un país de origen.');
+    return;
+  }
+
+  document.getElementById('loadingDiv').style.display = 'block';
+  document.getElementById('emailGate').style.display = 'none';
+  document.getElementById('results').style.display = 'none';
+
+  fetch('/api/scout', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      countries: selectedCountries,
+      criteria: selectedCriteria,
+      capital, canal, nicho, riesgo
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('loadingDiv').style.display = 'none';
+    pendingResults = data;
+    if (userEmail) {
+      showResults(data);
+    } else {
+      document.getElementById('emailGate').style.display = 'block';
+    }
+  })
+  .catch(err => {
+    document.getElementById('loadingDiv').style.display = 'none';
+    alert('Error al escanear mercados. Por favor intentá de nuevo.');
+  });
+}
+
+function unlockResults() {
+  const email = document.getElementById('emailInput').value;
+  if (!email || !email.includes('@')) {
+    alert('Por favor ingresá un email válido.');
+    return;
+  }
+  userEmail = email;
+  document.getElementById('emailGate').style.display = 'none';
+  if (pendingResults) showResults(pendingResults);
+}
+
+function showResults(data) {
+  const products = data.products || [];
+  const grid = document.getElementById('productGrid');
+  grid.innerHTML = '';
+  products.forEach(p => {
+    const isTop = p.topPick ? '<div class="top-pick-badge">TOP PICK</div>' : '';
+    const borderClass = p.topPick ? 'top-pick' : '';
+    grid.innerHTML += `
+    <div class="product-card ${borderClass}">
+      ${isTop}
+      <div class="product-country">${p.pais || p.origen || 'Internacional'}</div>
+      <div class="product-name">${p.nombre || p.name}</div>
+      <div class="score-bar-wrap">
+        <div class="score-label"><span>Score</span><span>${p.score}/100</span></div>
+        <div class="score-bar"><div class="score-fill" style="width:${p.score}%"></div></div>
+      </div>
+      <div class="product-stats">
+        <div class="stat-item"><div class="stat-val">${p.margen}%</div><div class="stat-key">Margen</div></div>
+        <div class="stat-item"><div class="stat-val">${p.demanda}</div><div class="stat-key">Demanda</div></div>
+        <div class="stat-item"><div class="stat-val">${p.riesgo || p.nivel_riesgo}</div><div class="stat-key">Riesgo</div></div>
+        <div class="stat-item"><div class="stat-val">${p.tendencia || '+'}</div><div class="stat-key">Tendencia</div></div>
+      </div>
+      ${p.descripcion ? '<p style="margin-top:10px;font-size:12px;color:var(--text-dim)">' + p.descripcion + '</p>' : ''}
+    </div>`;
+  });
+  document.getElementById('results').style.display = 'block';
+}
+
+function resetResults() {
+  pendingResults = null;
+  userEmail = null;
+  document.getElementById('emailGate').style.display = 'none';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('loadingDiv').style.display = 'none';
+}
+
+function exportPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFontSize(20);
+  doc.setTextColor(0, 229, 255);
+  doc.text('ProductScout IA - Innovasmart', 20, 20);
+  doc.setFontSize(12);
+  doc.setTextColor(0,0,0);
+  doc.text('Análisis de Mercados Globales', 20, 32);
+  doc.text('Fecha: ' + new Date().toLocaleDateString('es-AR'), 20, 42);
+  doc.text('Países analizados: ' + selectedCountries.join(', '), 20, 52);
+
+  if (pendingResults && pendingResults.products) {
+    let y = 70;
+    pendingResults.products.forEach((p, i) => {
+      doc.setFontSize(14);
+      doc.setTextColor(0, 100, 120);
+      doc.text((i+1) + '. ' + (p.nombre || p.name) + ' [' + (p.pais || p.origen || '') + ']', 20, y);
+      y += 10;
+      doc.setFontSize(11);
+      doc.setTextColor(0,0,0);
+      doc.text('Score: ' + p.score + '/100  |  Margen: ' + p.margen + '%  |  Demanda: ' + p.demanda, 20, y);
+      y += 8;
+      if (p.descripcion) {
+        const lines = doc.splitTextToSize(p.descripcion, 170);
+        doc.text(lines, 20, y);
+        y += lines.length * 6;
+      }
+      y += 8;
+      if (y > 270) { doc.addPage(); y = 20; }
+    });
+  }
+  doc.save('productscout-analisis-' + Date.now() + '.pdf');
+}
+
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+
+  const messagesEl = document.getElementById('chatMessages');
+  messagesEl.innerHTML += `<div class="msg user">${msg}</div>`;
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+
+  const thinkingEl = document.createElement('div');
+  thinkingEl.className = 'msg bot';
+  thinkingEl.textContent = '...';
+  messagesEl.appendChild(thinkingEl);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({message: msg, context: 'mercados_globales'})
+    });
+    const data = await res.json();
+    thinkingEl.textContent = data.response || 'Lo siento, no pude procesar tu consulta.';
+  } catch(e) {
+    thinkingEl.textContent = 'Error de conexión. Por favor intentá de nuevo.';
+  }
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+document.getElementById('loginPass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 </script>
 </body>
 </html>
