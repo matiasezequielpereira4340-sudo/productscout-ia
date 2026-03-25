@@ -11,7 +11,7 @@
 body{background:var(--dark);color:var(--text);font-family:'Segoe UI',sans-serif;min-height:100vh}
 .screen{display:none;min-height:100vh}
 .screen.active{display:flex}
-/* LOGIN */
+/* REGISTER & PLANS */.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:20px 0}
 #loginScreen{align-items:center;justify-content:center;background:radial-gradient(ellipse at center,#0a1a2a 0%,#050a0f 70%)}
 .login-box{background:var(--dark-3);border:1px solid var(--cyan-dim);border-radius:16px;padding:48px 40px;width:100%;max-width:400px;text-align:center;box-shadow:0 0 40px rgba(0,229,255,.08)}
 .login-logo{font-size:2.5rem;margin-bottom:8px}
@@ -153,7 +153,7 @@ select:focus{border-color:var(--cyan)}
       <span class="eye-toggle" onclick="toggleEye(this)">👁️</span>
     </div>
     <button class="btn-login" onclick="doLogin()">Ingresar</button>
-    <div class="login-error" id="loginError"></div>
+    <div class="login-error" id="loginError"></div>    <div style="text-align:center;margin-top:12px"><button class="btn-switch" onclick="showRegister()">¿No tenés cuenta? Registrate →</button></div>
   </div>
 </div>
 <!-- APP SCREEN -->
@@ -161,7 +161,7 @@ select:focus{border-color:var(--cyan)}
   <div class="topbar">
     <div class="topbar-logo">🛰️ ProductScout IA</div>
     <div class="topbar-user" id="topbarUser"></div>
-    <div class="topbar-expiry" id="topbarExpiry" style="display:none"></div>
+    <div class="topbar-expiry" id="topbarExpiry" style="display:none"></div>    <div id="topbarUsage" style="display:none;min-width:140px">      <div class="usage-bar-wrap">        <span id="usageText">0/10</span>        <div class="usage-bar"><div class="usage-fill" id="usageFill"></div></div>      </div>    <div id="topbarUsage" style="display:none;min-width:140px">      <div class="usage-bar-wrap">        <span id="usageText">0/10</span>    <div id="topbarUsage" style="display:none;min-width:140px">
     <button class="btn-admin-panel" id="btnAdminPanel" style="display:none" onclick="showAdmin()">👑 Admin</button>
     <button class="btn-logout" onclick="doLogout()">Salir</button>
   </div>
@@ -260,7 +260,7 @@ select:focus{border-color:var(--cyan)}
         <button class="btn-send" onclick="sendChat()">Enviar</button>
       </div>
     </div>
-    <div class="contact-section">
+    <div class="history-section" id="historySection" style="display:none">      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <h3>¿Necesitás asesoramiento personalizado?</h3>
       <p>Contactanos y te ayudamos a planificar tu próxima importación internacional</p>
       <div class="contact-buttons">
@@ -342,7 +342,7 @@ function toggleCriteria(el){
   else{selectedCriteria.push(c);}
 }
 
-async function doLogin(){
+// ---- REGISTRO & PLANES ----let selectedPlan = 'pro';
   const user=document.getElementById('loginUser').value.trim();
   const pass=document.getElementById('loginPass').value;
   const errEl=document.getElementById('loginError');
@@ -434,7 +434,7 @@ async function doScout(){
     });
     const data=await res.json();
     if(!res.ok||!data.products){throw new Error(data.error||'Error');}
-    scoutResults=data.products;
+    scoutResults=data.products;    const usedNow = parseInt(localStorage.getItem('pf_searches_used')||0) + 1;    const limit = parseInt(localStorage.getItem('pf_searches_limit')||10);    localStorage.setItem('pf_searches_used', usedNow);    const usedNow = parseInt(localStorage.getItem('pf_searches_used')||0) + 1;
     document.getElementById('emailGate').style.display='block';
   }catch(e){
     alert('Error al explorar: '+e.message);
