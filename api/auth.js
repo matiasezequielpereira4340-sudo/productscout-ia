@@ -1,79 +1,128 @@
-// ProductScout IA - Auth + User Management API
-// Admin: matypereira (never expires, full access)
-// Regular users: expire after N days from activation
+// ProductScout IA - Auth API (Supabase)
+// POST /api/auth - login con validacion Supabase + admin fallback
 
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
 const ADMIN_USER = process.env.APP_USER || 'matypereira';
 const ADMIN_PASS = process.env.APP_PASS || 'maty123';
-const ADMIN_KEY = process.env.ADMIN_KEY || 'pf-admin-secret-2024';
 
-function getUsers() {
-  try { return process.env.USERS_DB ? JSON.parse(process.env.USERS_DB) : []; }
-  catch { return []; }
-}
-
-function isExpired(u) {
-  if (!u.expiryDays || !u.createdAt) return false;
-  const expiry = new Date(u.createdAt);
-  expiry.setDate(expiry.getDate() + u.expiryDays);
-  return new Date() > expiry;
-}
+const PLAN_NAMES = {
+    basico: 'Basico',
+    pro: 'Pro',
+    agencia: 'Agencia'
+};
 
 function cors(res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,x-admin-key');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+}
+
+async function sbFetch(path, method = 'GET', body = null) {
+    const opts = {
+          method,
+          headers: {
+                  'apikey': SUPABASE_KEY,
+                  'Authorization': 'Bearer ' + SUPABASE_KEY,
+                  'Content-Type': 'application/json'
+          }
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, opts);
+    const data = await res.json();
+    return { ok: res.ok, data };
 }
 
 export default async function handler(req, res) {
-  cors(res);
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
+    cors(res);
+    if (req.method === 'OPTIONS') return res.status(200).end();
+    if (req.method !== 'POST') return res.status(405).json({ error: 'Metodo no permitido' });
 
-  const { username, password, action } = req.body || {};
-
-  if (action === 'login') {
+  const { username, password } = req.body || {};
     if (!username || !password) {
-      return res.status(400).json({ error: 'Usuario y contraseña requeridos' });
+          return res.status(400).json({ success: false, error: 'Faltan credenciales' });
     }
 
-    // Admin check - never expires
-    if (username === ADMIN_USER && password === ADMIN_PASS) {
-      return res.status(200).json({
-        success: true,
-        role: 'admin',
-        username: ADMIN_USER,
-        expiresAt: null
-      });
-    }
-
-    // Regular user check
-    const users = getUsers();
-    const user = users.find(u => u.username === username && u.password === password);
-
-    if (!user) {
-      return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
-    }
-
-    if (!user.active) {
-      return res.status(403).json({ error: 'Tu cuenta está desactivada. Contactá al administrador.' });
-    }
-
-    if (isExpired(user)) {
-      return res.status(403).json({ error: 'Tu sesión expiró. Contactá al administrador para renovarla.' });
-    }
-
-    // Calculate expiry date
-    const createdAt = new Date(user.createdAt);
-    const expiresAt = new Date(createdAt);
-    expiresAt.setDate(expiresAt.getDate() + user.expiryDays);
-
-    return res.status(200).json({
-      success: true,
-      role: 'user',
-      username: user.username,
-      expiresAt: expiresAt.toISOString()
-    });
+  // Admin hardcoded (nunca expira)
+  if (username === ADMIN_USER && password === ADMIN_PASS) {
+        return res.status(200).json({
+                success: true,
+                role: 'admin',
+                user: username,
+                plan: 'admin',
+                searches_used: 0,
+                searches_limit: 999
+        });
   }
 
-  return res.status(400).json({ error: 'Acción no reconocida' });
+  // Supabase lookup (if configured)
+  if (SUPABASE_URL && SUPABASE_KEY) {
+        const result = await sbFetch(
+                'users?username=eq.' + encodeURIComponent(username) +
+                '&select=username,password,email,role,plan,active,payment_status,expires_at,searches_this_month,searches_limit,month_reset'
+              );
+
+      if (!result.ok) {
+              return res.status(500).json({ success: false, error: 'Error de base de datos' });
+      }
+
+      const users = result.data;
+        if (!users || users.length === 0) {
+                return res.status(401).json({ success: false, error: 'Usuario o contrasena incorrectos' });
+        }
+
+      const user = users[0];
+
+      if (user.password !== password) {
+              return res.status(401).json({ success: false, error: 'Usuario o contrasena incorrectos' });
+      }
+        if (!user.active) {
+                return res.status(403).json({ success: false, error: 'Cuenta desactivada. Contacta al administrador.' });
+        }
+        if (user.payment_status !== 'paid') {
+                return res.status(403).json({
+                          success: false,
+                          error: 'Pago pendiente. Completa el pago para acceder.',
+                          payment_status: user.payment_status
+                });
+        }
+        if (user.expires_at && new Date() > new Date(user.expires_at)) {
+                return res.status(403).json({
+                          success: false,
+                          error: 'Tu acceso expiro. Renova tu plan para continuar.',
+                          expired: true
+                });
+        }
+
+      // Reset monthly counter if needed
+      const now = new Date();
+        let searchesUsed = user.searches_this_month || 0;
+        if (user.month_reset && now >= new Date(user.month_reset)) {
+                searchesUsed = 0;
+                await sbFetch(
+                          'users?username=eq.' + encodeURIComponent(username),
+                          'PATCH',
+                  {
+                              searches_this_month: 0,
+                              month_reset: new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString()
+                  }
+                        );
+        }
+
+      return res.status(200).json({
+              success: true,
+              role: user.role || 'user',
+              user: username,
+              email: user.email,
+              plan: user.plan,
+              plan_name: PLAN_NAMES[user.plan] || user.plan,
+              expires_at: user.expires_at,
+              searches_used: searchesUsed,
+              searches_limit: user.searches_limit || 10,
+              payment_status: user.payment_status
+      });
+  }
+
+  // Fallback if Supabase not configured
+  return res.status(401).json({ success: false, error: 'Usuario o contrasena incorrectos' });
 }
