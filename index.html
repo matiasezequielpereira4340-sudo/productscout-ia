@@ -134,6 +134,27 @@ select:focus{border-color:var(--cyan)}
 .admin-msg.ok{background:rgba(0,255,136,.1);color:var(--green);border:1px solid var(--green);display:block}
 .admin-msg.err{background:rgba(255,68,68,.1);color:var(--red);border:1px solid var(--red);display:block}
 .loading{text-align:center;color:var(--text-dim);padding:20px}
+
+/* REGISTER SCREEN */
+#registerScreen{align-items:flex-start;justify-content:center;background:radial-gradient(ellipse at center,#0a1a2a 0%,#050a0f 70%);padding:40px 20px;overflow-y:auto}
+.register-box{background:var(--dark-3);border:1px solid var(--cyan-dim);border-radius:16px;padding:40px;width:100%;max-width:600px;margin:auto}
+.register-box h2{color:var(--cyan);margin-bottom:6px;font-size:1.4rem}
+.register-box p{color:var(--text-dim);font-size:.9rem;margin-bottom:20px}
+.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
+.plan-card{background:var(--dark-4);border:2px solid #1a3a55;border-radius:12px;padding:16px;cursor:pointer;text-align:center;transition:all .2s}
+.plan-card:hover,.plan-card.selected{border-color:var(--cyan);background:rgba(0,229,255,.06)}
+.plan-name{font-weight:700;color:var(--cyan);margin-bottom:4px}
+.plan-price{font-size:1.2rem;font-weight:700;margin-bottom:6px}
+.plan-desc{font-size:.78rem;color:var(--text-dim)}
+.btn-switch{background:transparent;border:none;color:var(--cyan);cursor:pointer;font-size:.85rem;text-decoration:underline}
+/* USAGE BAR */
+.usage-bar-wrap{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--text-dim)}
+.usage-bar{flex:1;height:6px;background:#1a3a55;border-radius:3px;min-width:60px}
+.usage-fill{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--cyan-dim),var(--cyan));transition:width .3s}
+/* HISTORY */
+.history-section{background:var(--dark-3);border:1px solid #1a3a55;border-radius:12px;padding:24px;margin-top:24px}
+.history-section h3{color:var(--cyan);margin-bottom:16px}
+.history-item{background:var(--dark-4);border-radius:8px;padding:12px;margin-bottom:8px;font-size:.85rem}
 </style>
 </head>
 <body>
@@ -156,12 +177,57 @@ select:focus{border-color:var(--cyan)}
     <div class="login-error" id="loginError"></div>    <div style="text-align:center;margin-top:12px"><button class="btn-switch" onclick="showRegister()">¿No tenés cuenta? Registrate →</button></div>
   </div>
 </div>
+<!-- REGISTER SCREEN -->
+<div id="registerScreen" class="screen">
+  <div class="register-box">
+    <h2>🚀 Crear Cuenta</h2>
+    <p>Elegí tu plan y empezá a explorar mercados internacionales</p>
+    <div class="plans-grid">
+      <div class="plan-card" data-plan="basico" onclick="selectPlan('basico')">
+        <div class="plan-name">Básico</div>
+        <div class="plan-price">$10 USD/mes</div>
+        <div class="plan-desc">10 búsquedas/mes</div>
+      </div>
+      <div class="plan-card selected" data-plan="pro" onclick="selectPlan('pro')">
+        <div class="plan-name">Pro ⭐</div>
+        <div class="plan-price">$25 USD/mes</div>
+        <div class="plan-desc">Ilimitado + Historial</div>
+      </div>
+      <div class="plan-card" data-plan="agencia" onclick="selectPlan('agencia')">
+        <div class="plan-name">Agencia</div>
+        <div class="plan-price">$60 USD/mes</div>
+        <div class="plan-desc">Todo Pro + Multi-usuario</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Usuario</label>
+      <input type="text" id="regUser" placeholder="Elegí un usuario">
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="regEmail" placeholder="tu@email.com">
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" id="regPass" placeholder="Mínimo 6 caracteres">
+    </div>
+    <button class="btn-login" onclick="doRegister()">Crear Cuenta y Pagar →</button>
+    <div class="login-error" id="regError"></div>
+    <div style="text-align:center;margin-top:12px"><button class="btn-switch" onclick="showLogin()">← Ya tengo cuenta</button></div>
+  </div>
+</div>
 <!-- APP SCREEN -->
 <div id="appScreen" class="screen">
   <div class="topbar">
     <div class="topbar-logo">🛰️ ProductScout IA</div>
     <div class="topbar-user" id="topbarUser"></div>
-    <div class="topbar-expiry" id="topbarExpiry" style="display:none"></div>    <div id="topbarUsage" style="display:none;min-width:140px">      <div class="usage-bar-wrap">        <span id="usageText">0/10</span>        <div class="usage-bar"><div class="usage-fill" id="usageFill"></div></div>      </div>    <div id="topbarUsage" style="display:none;min-width:140px">      <div class="usage-bar-wrap">        <span id="usageText">0/10</span>    <div id="topbarUsage" style="display:none;min-width:140px">
+    <div class="topbar-expiry" id="topbarExpiry" style="display:none"></div>
+    <div id="topbarUsage" style="display:none;min-width:140px">
+      <div class="usage-bar-wrap">
+        <span id="usageText">0/10</span>
+        <div class="usage-bar"><div class="usage-fill" id="usageFill"></div></div>
+      </div>
+    </div>
     <button class="btn-admin-panel" id="btnAdminPanel" style="display:none" onclick="showAdmin()">👑 Admin</button>
     <button class="btn-logout" onclick="doLogout()">Salir</button>
   </div>
@@ -260,15 +326,21 @@ select:focus{border-color:var(--cyan)}
         <button class="btn-send" onclick="sendChat()">Enviar</button>
       </div>
     </div>
-    <div class="history-section" id="historySection" style="display:none">      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <h3>¿Necesitás asesoramiento personalizado?</h3>
-      <p>Contactanos y te ayudamos a planificar tu próxima importación internacional</p>
-      <div class="contact-buttons">
-        <a class="btn-wa" href="https://wa.me/541160374306" target="_blank">💬 WhatsApp</a>
-        <a class="btn-is" href="https://matiasezequielpereira4340-sudo.github.io/InnovaSmart/" target="_blank">🌐 InnovaSmart</a>
-      </div>
+    <div class="history-section" id="historySection" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3>📋 Historial de Búsquedas</h3>
+    </div>
+    <div id="historyList" class="loading">Cargando historial...</div>
+  </div>
+  <div class="contact-section">
+    <h3>¿Necesitás asesoramiento personalizado?</h3>
+    <p>Contactanos y te ayudamos a planificar tu próxima importación internacional</p>
+    <div class="contact-buttons">
+      <a class="btn-wa" href="https://wa.me/541160374306" target="_blank">💬 WhatsApp</a>
+      <a class="btn-is" href="https://matiasezequielpereira4340-sudo.github.io/InnovaSmart/" target="_blank">🌐 InnovaSmart</a>
     </div>
   </div>
+</div>
 </div>
 <!-- ADMIN SCREEN -->
 <div id="adminScreen" class="screen">
@@ -321,6 +393,7 @@ let sessionExpiry = null;
 let scoutResults = null;
 let selectedCountries = [];
 let selectedCriteria = [];
+let selectedPlan = 'pro';
 
 function toggleEye(el){
   const inp=el.previousElementSibling;
@@ -342,7 +415,48 @@ function toggleCriteria(el){
   else{selectedCriteria.push(c);}
 }
 
-// ---- REGISTRO & PLANES ----let selectedPlan = 'pro';
+function showRegister(){
+  const reg=document.getElementById('registerScreen');
+  if(reg) reg.classList.add('active');
+  document.getElementById('loginScreen').classList.remove('active');
+}
+
+function showLogin(){
+  const reg=document.getElementById('registerScreen');
+  if(reg) reg.classList.remove('active');
+  document.getElementById('loginScreen').classList.add('active');
+}
+
+function selectPlan(plan){
+  selectedPlan=plan;
+  document.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('selected'));
+  const el=document.querySelector('[data-plan="'+plan+'"]');
+  if(el) el.classList.add('selected');
+}
+
+async function doRegister(){
+  const u=document.getElementById('regUser').value.trim();
+  const p=document.getElementById('regPass').value;
+  const e=document.getElementById('regEmail').value.trim();
+  const err=document.getElementById('regError');
+  err.textContent='';
+  if(!u||!p||!e){err.textContent='Completá todos los campos';return;}
+  if(!e.includes('@')){err.textContent='Email inválido';return;}
+  try{
+    const res=await fetch('/api/register',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username:u,password:p,email:e,plan:selectedPlan})
+    });
+    const data=await res.json();
+    if(!res.ok){err.textContent=data.error||'Error al registrarse';return;}
+    if(data.paymentUrl){window.open(data.paymentUrl,'_blank');}
+    err.style.color='var(--green)';
+    err.textContent='✅ Cuenta creada. Completá el pago para activarla.';
+  }catch(ex){err.textContent='Error de conexión';}
+}
+
+async function doLogin(){
   const user=document.getElementById('loginUser').value.trim();
   const pass=document.getElementById('loginPass').value;
   const errEl=document.getElementById('loginError');
@@ -360,27 +474,50 @@ function toggleCriteria(el){
     sessionExpiry=data.expiresAt||null;
     localStorage.setItem('ps_user',user);
     localStorage.setItem('ps_role',currentRole);
+    localStorage.setItem('ps_plan',data.plan||'basico');
+    localStorage.setItem('pf_searches_used',data.searchesUsed||0);
+    localStorage.setItem('pf_searches_limit',data.searchesLimit||10);
     if(sessionExpiry) localStorage.setItem('ps_expiry',sessionExpiry);
     showScreen('appScreen');
-    setupTopbar(user);
+    setupTopbar(user,data);
   }catch(e){errEl.textContent='Error de conexión. Intentá de nuevo.';}
 }
 
-function setupTopbar(user){
+function setupTopbar(user,data){
   document.getElementById('topbarUser').textContent=user;
   document.getElementById('adminTopbarUser').textContent=user;
   const expiryEl=document.getElementById('topbarExpiry');
   const adminBtn=document.getElementById('btnAdminPanel');
+  const usageEl=document.getElementById('topbarUsage');
   if(currentRole==='admin'){
     expiryEl.style.display='none';
     adminBtn.style.display='block';
+    if(usageEl) usageEl.style.display='none';
   } else if(sessionExpiry){
     const days=Math.ceil((new Date(sessionExpiry)-Date.now())/(1000*60*60*24));
     expiryEl.style.display='block';
     expiryEl.textContent=days>0?'⏱ '+days+'d restantes':'Sesión expirada';
     if(days<=7) expiryEl.classList.add('urgent');
     adminBtn.style.display='none';
+    const plan=localStorage.getItem('ps_plan')||'basico';
+    if(plan==='basico'){
+      updateUsageBar();
+    } else {
+      if(usageEl) usageEl.style.display='none';
+    }
   }
+}
+
+function updateUsageBar(){
+  const usageEl=document.getElementById('topbarUsage');
+  const usageText=document.getElementById('usageText');
+  const usageFill=document.getElementById('usageFill');
+  if(!usageEl) return;
+  const used=parseInt(localStorage.getItem('pf_searches_used')||0);
+  const limit=parseInt(localStorage.getItem('pf_searches_limit')||10);
+  if(usageText) usageText.textContent=used+'/'+limit;
+  if(usageFill) usageFill.style.width=Math.min(100,Math.round(used/limit*100))+'%';
+  usageEl.style.display='block';
 }
 
 function showScreen(id){
@@ -402,6 +539,7 @@ function doLogout(){
   localStorage.removeItem('ps_user');
   localStorage.removeItem('ps_role');
   localStorage.removeItem('ps_expiry');
+  localStorage.removeItem('ps_plan');
   document.getElementById('loginUser').value='';
   document.getElementById('loginPass').value='';
   document.getElementById('loginError').textContent='';
@@ -414,6 +552,13 @@ function doLogout(){
 
 async function doScout(){
   if(selectedCountries.length===0){alert('Seleccioná al menos un país de origen');return;}
+  const plan=localStorage.getItem('ps_plan')||'basico';
+  const used=parseInt(localStorage.getItem('pf_searches_used')||0);
+  const limit=parseInt(localStorage.getItem('pf_searches_limit')||10);
+  if(plan==='basico'&&used>=limit){
+    alert('Límite de búsquedas alcanzado ('+limit+'). Actualizá tu plan a Pro para búsquedas ilimitadas.');
+    return;
+  }
   const btn=document.getElementById('btnScout');
   btn.disabled=true;btn.textContent='🔄 Explorando...';
   document.getElementById('emailGate').style.display='none';
@@ -424,7 +569,8 @@ async function doScout(){
     capital:document.getElementById('selCapital').value,
     canal:document.getElementById('selCanal').value,
     categoria:document.getElementById('selCategoria').value,
-    riesgo:document.getElementById('selRiesgo').value
+    riesgo:document.getElementById('selRiesgo').value,
+    username:localStorage.getItem('ps_user')||null
   };
   try{
     const res=await fetch('/api/scout',{
@@ -434,7 +580,12 @@ async function doScout(){
     });
     const data=await res.json();
     if(!res.ok||!data.products){throw new Error(data.error||'Error');}
-    scoutResults=data.products;    const usedNow = parseInt(localStorage.getItem('pf_searches_used')||0) + 1;    const limit = parseInt(localStorage.getItem('pf_searches_limit')||10);    localStorage.setItem('pf_searches_used', usedNow);    const usedNow = parseInt(localStorage.getItem('pf_searches_used')||0) + 1;
+    scoutResults=data.products;
+    if(plan==='basico'){
+      const newUsed=used+1;
+      localStorage.setItem('pf_searches_used',newUsed);
+      updateUsageBar();
+    }
     document.getElementById('emailGate').style.display='block';
   }catch(e){
     alert('Error al explorar: '+e.message);
@@ -536,7 +687,8 @@ function renderUsersTable(users){
     else{badge='<span class="badge active">Activo</span>';}
     const expiryStr=isAdminUser?'Sin expiración':(expiry?expiry.toLocaleDateString('es-AR')+' ('+daysLeft+'d)':'N/A');
     const created=u.createdAt?new Date(u.createdAt).toLocaleDateString('es-AR'):'-';
-    const toggleBtn=isAdminUser?'':`<button class="btn-sm btn-toggle ${u.active?'deactivate':''}" onclick="toggleUser('${u.username}',${u.active?'false':'true'})">${u.active?'Desactivar':'Activar'}</button>`;    const delBtn=isAdminUser?'':`<button class="btn-sm btn-delete" onclick="deleteUser('${u.username}')">Eliminar</button>`;
+    const toggleBtn=isAdminUser?'':`<button class="btn-sm btn-toggle ${u.active?'deactivate':''}" onclick="toggleUser('${u.username}',${u.active?'false':'true'})">${u.active?'Desactivar':'Activar'}</button>`;
+    const delBtn=isAdminUser?'':`<button class="btn-sm btn-delete" onclick="deleteUser('${u.username}')">Eliminar</button>`;
     return `<tr>
       <td><strong>${u.username}</strong></td>
       <td>${badge}</td>
@@ -623,7 +775,7 @@ window.addEventListener('DOMContentLoaded',()=>{
     currentRole=savedRole;
     sessionExpiry=savedExpiry||null;
     showScreen('appScreen');
-    setupTopbar(savedUser);
+    setupTopbar(savedUser,{plan:localStorage.getItem('ps_plan')||'basico'});
   }
 });
 </script>
