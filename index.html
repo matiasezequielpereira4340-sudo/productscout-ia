@@ -6,7 +6,7 @@
 <title>ProductScout IA - Innovasmart</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-:root{--cyan:#00e5ff;--cyan-dim:#0099aa;--dark:#050a0f;--dark-2:#0a1520;--dark-3:#0f1e2d;--dark-4:#152535;--text:#e0f0ff;--text-dim:#6090aa;--red:#ff4444;--green:#00ff88;--orange:#ffaa00;--radius:8px}
+:root{--cyan:#00e5ff;--cyan-dim:#0099aa;--dark:#050a0f;--darkh-2:#0a1520;--dark-3:#0f1e2d;--dark-4:#152535;--text:#e0f0ff;--text-dim:#6090aa;--red:#ff4444;--green:#00ff88;--orange:#ffaa00;--radius:8px}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--dark);color:var(--text);font-family:'Segoe UI',sans-serif;min-height:100vh}
 .screen{display:none;min-height:100vh}
@@ -468,20 +468,8 @@ async function doRegister(){
     const data=await res.json();
     if(!res.ok){err.textContent=data.error||'Error al registrarse';return;}
     // Crear preferencia de pago en Mercado Pago
-    const payRes=await fetch('/api/payment/create',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({username:u,plan:selectedPlan})
-    });
-    const payData=await payRes.json();
-    if(payData.init_point){
-      err.style.color='var(--green)';
-      err.textContent='✅ Cuenta creada. Redirigiendo al pago...';
-      setTimeout(()=>{ window.location.href=payData.init_point; },1200);
-    } else {
-      err.style.color='var(--green)';
-      err.textContent='✅ Cuenta creada. Completá el pago para activarla.';
-    }
+            err.style.color='var(--green)';
+            err.textContent='✅ Cuenta creada exitosamente. Ya podés iniciar sesión.';
   }catch(ex){err.textContent='Error de conexión';}
 }
 
@@ -794,8 +782,8 @@ function renderUsersTable(users){
     const expiryStr=isAdminUser?'Sin expiración':(expiry?expiry.toLocaleDateString('es-AR')+' ('+daysLeft+'d)':'N/A');
     const created=u.created_at?new Date(u.created_at).toLocaleDateString('es-AR'):(u.createdAt?new Date(u.createdAt).toLocaleDateString('es-AR'):'-');
     const planBadge=u.plan?('<span style="font-size:.72rem;color:var(--cyan)">'+u.plan+'</span> '):'';
-    const toggleBtn=isAdminUser?'':('<button class="btn-sm btn-toggle '+(u.active?'deactivate':'')+'" onclick="toggleUser(''+u.username+'','+(u.active?'false':'true')+')">'+(u.active?'Desactivar':'Activar')+'</button>');
-    const delBtn=isAdminUser?'':('<button class="btn-sm btn-delete" onclick="deleteUser(''+u.username+'')">Eliminar</button>');
+        const toggleBtn=isAdminUser?'':(`<button class="btn-sm btn-toggle ${u.active?'deactivate':''}" onclick="toggleUser('${u.username}',${u.active?'false':'true'})">${u.active?'Desactivar':'Activar'}</button>`);
+        const delBtn=isAdminUser?'':(`<button class="btn-sm btn-delete" onclick="deleteUser('${u.username}')">Eliminar</button>`);
     return '<tr><td><strong>'+u.username+'</strong></td><td>'+badge+'</td><td>'+planBadge+(u.expiryDays||'-')+' días</td><td>'+created+'</td><td>'+expiryStr+'</td><td>'+toggleBtn+delBtn+'</td></tr>';
   }).join('');
   container.innerHTML='<table class="users-table"><thead><tr><th>Usuario</th><th>Estado</th><th>Plan/Sesión</th><th>Creado</th><th>Expira</th><th>Acciones</th></tr></thead><tbody>'+rows+'</tbody></table>';
