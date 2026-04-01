@@ -745,10 +745,10 @@ async function sendChat(){
     const res=await fetch('/api/chat',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({message:msg,context:scoutResults?JSON.stringify(scoutResults):null})
+      body:JSON.stringify({message:msg,context:window.scoutResults?JSON.stringify(window.scoutResults):null})
     });
     const data=await res.json();
-    thinking.textContent=data.reply||'No pude procesar tu consulta.';
+    thinking.textContent=data.reply||data.response||'No pude procesar tu consulta.';
   }catch(e){thinking.textContent='Error de conexión.';}
   box.scrollTop=box.scrollHeight;
 }
