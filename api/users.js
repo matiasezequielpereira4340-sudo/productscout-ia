@@ -1,124 +1,122 @@
 // ProductScout IA - Users Management API
-// Solución FINAL: Lee USERS_DB directo de Vercel API (valor real, no caché)
-// Escribe con PATCH a Vercel API. Sin redeploy. Sin dependencias externas.
+// Almacenamiento con Supabase (tabla: users)
 
 const ADMIN_USER = process.env.APP_USER || 'matypereira';
-const ADMIN_KEY  = process.env.ADMIN_KEY || 'pf-admin-secret-2024';
+const ADMIN_KEY = process.env.ADMIN_KEY || 'pf-admin-secret-2024';
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
-async function getUsersDB(projectId, token) {
-  // Obtener la lista de env vars y su ID
-  const res = await fetch(`https://api.vercel.com/v10/projects/${projectId}/env`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  if (!res.ok) return { users: [], envId: null };
-  const data = await res.json();
-  const envVar = (data.envs || []).find(e => e.key === 'USERS_DB');
-  if (!envVar) return { users: [], envId: null };
-
-  // Obtener el valor REAL del env var (GET single env var devuelve el value decrypted)
-  const envRes = await fetch(
-    `https://api.vercel.com/v10/projects/${projectId}/env/${envVar.id}`,
-    { headers: { Authorization: `Bearer ${token}` } }
-  );
-  if (!envRes.ok) return { users: [], envId: envVar.id };
-  const envData = await envRes.json();
-  
-  try {
-    const value = envData.value || '';
-    const users = value ? JSON.parse(value) : [];
-    return { users: Array.isArray(users) ? users : [], envId: envVar.id };
-  } catch {
-    return { users: [], envId: envVar.id };
-  }
+async function sbFetch(path, options = {}) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+          ...options,
+          headers: {
+                  'apikey': SUPABASE_KEY,
+                  'Authorization': `Bearer ${SUPABASE_KEY}`,
+                  'Content-Type': 'application/json',
+                  'Prefer': 'return=representation',
+                  ...(options.headers || {})
+          }
+    });
+    return res;
 }
 
-async function getUsers(projectId, token) {
-  try {
-    if (projectId && token) {
-      const { users } = await getUsersDB(projectId, token);
-      return users;
+async function getUsers() {
+    try {
+          const res = await sbFetch('users?select=*&order=created_at.asc');
+          if (!res.ok) return [];
+          return await res.json();
+    } catch(e) {
+          console.error('getUsers error:', e.message);
+          return [];
     }
-  } catch(e) { console.error('getUsers error:', e.message); }
-  // Fallback
-  try { return process.env.USERS_DB ? JSON.parse(process.env.USERS_DB) : []; }
-  catch { return []; }
 }
 
-async function persistUsers(users, projectId, token) {
-  try {
-    const { envId } = await getUsersDB(projectId, token);
-    const newValue = JSON.stringify(users);
-    
-    if (envId) {
-      const res = await fetch(`https://api.vercel.com/v10/projects/${projectId}/env/${envId}`, {
-        method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ value: newValue, type: 'plain', target: ['production','preview','development'] })
-      });
-      return res.ok;
-    } else {
-      const res = await fetch(`https://api.vercel.com/v10/projects/${projectId}/env`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: 'USERS_DB', value: newValue, type: 'plain', target: ['production','preview','development'] })
-      });
-      return res.ok;
-    }
-  } catch(e) { console.error('persistUsers error:', e.message); return false; }
+async function createUser(username, password, expiryDays) {
+    const res = await sbFetch('users', {
+          method: 'POST',
+          body: JSON.stringify({
+                  username,
+                  password,
+                  expiry_days: parseInt(expiryDays) || 30,
+                  active: true,
+                  created_at: new Date().toISOString()
+          })
+    });
+    return res.ok;
+}
+
+async function updateUser(username, data) {
+    const res = await sbFetch(`users?username=eq.${encodeURIComponent(username)}`, {
+          method: 'PATCH',
+          body: JSON.stringify(data)
+    });
+    return res.ok;
+}
+
+async function deleteUserFromDB(username) {
+    const res = await sbFetch(`users?username=eq.${encodeURIComponent(username)}`, {
+          method: 'DELETE'
+    });
+    return res.ok;
 }
 
 function isExpired(u) {
-  if (!u.expiryDays || !u.createdAt) return false;
-  const expiry = new Date(u.createdAt);
-  expiry.setDate(expiry.getDate() + u.expiryDays);
-  return Date.now() > expiry.getTime();
+    if (!u.expiry_days || !u.created_at) return false;
+    const expiry = new Date(u.created_at);
+    expiry.setDate(expiry.getDate() + u.expiry_days);
+    return Date.now() > expiry.getTime();
 }
 
 function cors(res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-admin-key');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-admin-key');
 }
 
 export default async function handler(req, res) {
-  cors(res);
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  
+    cors(res);
+    if (req.method === 'OPTIONS') return res.status(200).end();
+
   if (req.headers['x-admin-key'] !== ADMIN_KEY) {
-    return res.status(403).json({ error: 'Acceso denegado' });
+        return res.status(403).json({ error: 'Acceso denegado' });
   }
 
-  const projectId = process.env.VERCEL_PROJECT_ID;
-  const token = process.env.VERCEL_TOKEN;
-
   if (req.method === 'GET') {
-    const users = await getUsers(projectId, token);
-    return res.status(200).json({ users: [
-      { username: ADMIN_USER, role: 'admin', active: true, expiryDays: null, createdAt: null },
-      ...users.map(u => ({ ...u, role: 'user', expired: isExpired(u) }))
-    ]});
+        const users = await getUsers();
+        return res.status(200).json({ users: [
+          { username: ADMIN_USER, role: 'admin', active: true, expiryDays: null, createdAt: null },
+                ...users.map(u => ({
+                          username: u.username,
+                          role: 'user',
+                          active: u.active,
+                          expiryDays: u.expiry_days,
+                          createdAt: u.created_at,
+                          expired: isExpired(u)
+                }))
+              ]});
   }
 
   if (req.method === 'POST') {
-    const { username, password, expiryDays } = req.body || {};
-    if (!username || !password) return res.status(400).json({ error: 'Faltan campos requeridos' });
-    if (username === ADMIN_USER) return res.status(400).json({ error: 'Nombre de usuario reservado' });
-    const users = await getUsers(projectId, token);
-    if (users.find(u => u.username === username)) return res.status(400).json({ error: 'El usuario ya existe' });
-    users.push({ username, password, expiryDays: parseInt(expiryDays) || 30, createdAt: new Date().toISOString(), active: true });
-    await persistUsers(users, projectId, token);
-    return res.status(201).json({ success: true, message: 'Usuario creado correctamente' });
+        const { username, password, expiryDays } = req.body || {};
+        if (!username || !password) return res.status(400).json({ error: 'Faltan campos requeridos' });
+        if (username === ADMIN_USER) return res.status(400).json({ error: 'Nombre de usuario reservado' });
+        const existing = await getUsers();
+        if (existing.find(u => u.username === username)) return res.status(400).json({ error: 'El usuario ya existe' });
+        const ok = await createUser(username, password, expiryDays);
+        if (!ok) return res.status(500).json({ error: 'Error al crear usuario en base de datos' });
+        return res.status(201).json({ success: true, message: 'Usuario creado correctamente' });
   }
 
   if (req.method === 'DELETE') {
-    const { username, action, active } = req.body || {};
-    if (!username) return res.status(400).json({ error: 'Falta username' });
-    let users = await getUsers(projectId, token);
-    users = action === 'toggle'
-      ? users.map(u => u.username === username ? { ...u, active } : u)
-      : users.filter(u => u.username !== username);
-    await persistUsers(users, projectId, token);
-    return res.status(200).json({ success: true });
+        const { username, action, active } = req.body || {};
+        if (!username) return res.status(400).json({ error: 'Falta username' });
+        if (action === 'toggle') {
+                await updateUser(username, { active });
+                return res.status(200).json({ success: true });
+        } else {
+                await deleteUserFromDB(username);
+                return res.status(200).json({ success: true });
+        }
   }
 
   return res.status(405).json({ error: 'Metodo no permitido' });
